@@ -904,6 +904,11 @@
       <span class="flex-40">{{ 'labels.inputs.Income type' | translate }}:</span>
       <span class="flex-60">{{ loanProduct.capitalizedIncomeType?.value | translateKey: 'catalogs' }}</span>
     </div>
+
+    <div fxFlexFill *ngIf="loanProduct.enableIncomeCapitalization">
+      <span fxFlex="47%">{{ 'labels.inputs.Income type' | translate }}:</span>
+      <span fxFlex="53%">{{ loanProduct.capitalizedIncomeType?.value | translateKey: 'catalogs' }}</span>
+    </div>
   </div>
 
   <div class="flex-100 layout-row-wrap responsive-column" *ngIf="isAdvancedPaymentAllocation">
