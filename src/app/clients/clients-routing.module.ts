@@ -21,6 +21,7 @@ import { ViewChargeComponent } from './clients-view/charges/view-charge/view-cha
 import { ClientPayChargesComponent } from './clients-view/charges/client-pay-charges/client-pay-charges.component';
 import { EditClientComponent } from './edit-client/edit-client.component';
 import { CreateClientComponent } from './create-client/create-client.component';
+import { ClientTransactionsTabComponent } from './clients-view/transactions-tab/transactions-tab.component';
 
 /** Custom Resolvers */
 import { ClientViewResolver } from './common-resolvers/client-view.resolver';
@@ -160,6 +161,11 @@ const routes: Routes = [
               resolve: {
                 clientNotes: ClientNotesResolver
               }
+            },
+            {
+              path: 'transactions',
+              component: ClientTransactionsTabComponent,
+              data: { title: 'Transactions', breadcrumb: 'Transactions', routeParamBreadcrumb: false }
             },
             {
               path: 'datatables',
