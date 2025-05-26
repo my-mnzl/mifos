@@ -96,7 +96,7 @@ export class EditStandingInstructionsComponent implements OnInit {
       validTill: this.standingInstructionsData.validTill && new Date(this.standingInstructionsData.validTill),
       recurrenceType: this.standingInstructionsData.recurrenceType.id,
       recurrenceInterval: this.standingInstructionsData.recurrenceInterval,
-      recurrenceFrequency: this.standingInstructionsData.recurrenceFrequency.id,
+      recurrenceFrequency: this.standingInstructionsData.recurrenceFrequency?.id,
       recurrenceOnMonthDay:
         this.standingInstructionsData.recurrenceOnMonthDay &&
         new Date(this.standingInstructionsData.recurrenceOnMonthDay)
@@ -160,7 +160,7 @@ export class EditStandingInstructionsComponent implements OnInit {
   submit() {
     const dateFormat = this.settingsService.dateFormat;
     const locale = this.settingsService.language.code;
-    const standingInstructionData = {
+    const standingInstructionData: any = {
       amount: this.editStandingInstructionsForm.value.amount,
       dateFormat,
       instructionType: this.editStandingInstructionsForm.value.instructionType,
@@ -169,15 +169,20 @@ export class EditStandingInstructionsComponent implements OnInit {
       priority: this.editStandingInstructionsForm.value.priority,
       recurrenceFrequency: this.editStandingInstructionsForm.value.recurrenceFrequency,
       recurrenceInterval: this.editStandingInstructionsForm.value.recurrenceInterval,
-      recurrenceOnMonthDay: this.dateUtils.formatDate(
-        this.editStandingInstructionsForm.value.recurrenceOnMonthDay,
-        'dd MMMM'
-      ),
       recurrenceType: this.editStandingInstructionsForm.value.recurrenceType,
       status: this.editStandingInstructionsForm.value.status,
       validFrom: this.dateUtils.formatDate(this.editStandingInstructionsForm.value.validFrom, dateFormat),
       validTill: this.dateUtils.formatDate(this.editStandingInstructionsForm.value.validTill, dateFormat)
     };
+
+    // Only include recurrenceOnMonthDay if it has a value
+    if (this.editStandingInstructionsForm.value.recurrenceOnMonthDay) {
+      standingInstructionData.recurrenceOnMonthDay = this.dateUtils.formatDate(
+        this.editStandingInstructionsForm.value.recurrenceOnMonthDay,
+        'dd MMMM'
+      );
+    }
+
     this.accountTransfersService
       .updateStandingInstructionsData(this.standingInstructionsId, standingInstructionData)
       .subscribe((response: any) => {
