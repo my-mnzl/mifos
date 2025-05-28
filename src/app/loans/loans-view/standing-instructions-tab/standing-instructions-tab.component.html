@@ -60,6 +60,7 @@
               color="primary"
               matTooltip="{{ 'tooltips.Edit Standing Instruction' | translate }}"
               *mifosxHasPermission="'UPDATE_STANDINGINSTRUCTION'"
+              [routerLink]="['../../..', 'standing-instructions', instruction.id, 'edit']"
             >
               <i class="fa fa-edit"></i>
             </button>
@@ -82,6 +83,7 @@
             color="primary"
             matTooltip="{{ 'tooltips.View Standing Instruction' | translate }}"
             *mifosxHasPermission="'READ_STANDINGINSTRUCTION'"
+            [routerLink]="['../../..', 'standing-instructions', instruction.id, 'view']"
           >
             <i class="fa fa-eye"></i>
           </button>
