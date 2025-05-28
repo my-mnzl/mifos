@@ -3,7 +3,17 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 
 /** rxjs Imports */
-import { Observable } from 'rxjs';
+import { Observable, forkJoin } from 'rxjs';
+import { map } from 'rxjs/operators';
+
+/**
+ * Interface for standing instructions response
+ */
+interface StandingInstructionsResponse {
+  pageItems: any[];
+  totalFilteredRecords: number;
+  totalRecords: number;
+}
 
 /**
  * Savings Service.
@@ -68,26 +78,77 @@ export class SavingsService {
   /**
    * @param clientId Client Id
    * @param clientName Client Name
-   * @param fromAccountId Account Id
+   * @param accountId Account Id to fetch standing instructions for (both as source and destination)
    * @param locale Locale
    * @param dateFormat Date Format
-   * @returns {Observable<any>} Standing Instructions
+   * @returns {Observable<StandingInstructionsResponse>} Combined Standing Instructions from both directions
    */
   getStandingInstructions(
     clientId: string,
     clientName: string,
-    fromAccountId: string,
+    accountId: string,
     locale: string,
     dateFormat: string
-  ): Observable<any> {
-    const httpParams = new HttpParams()
+  ): Observable<StandingInstructionsResponse> {
+    const baseParams = new HttpParams()
       .set('clientId', clientId)
       .set('clientName', clientName)
-      .set('fromAccountId', fromAccountId)
-      .set('fromAccountType', '2')
       .set('locale', locale)
-      .set('dateFormat', dateFormat);
-    return this.http.get(`/standinginstructions`, { params: httpParams });
+      .set('dateFormat', dateFormat)
+      .set('limit', '14')
+      .set('offset', '0');
+
+    // Get standing instructions where this account is the source
+    const fromAccountParams = baseParams.set('fromAccountId', accountId).set('fromAccountType', '2');
+    const fromAccountRequest = this.http.get<StandingInstructionsResponse>(`/standinginstructions`, {
+      params: fromAccountParams
+    });
+
+    // Get standing instructions where this account is the destination
+    const toAccountParams = baseParams.set('toAccountId', accountId).set('toAccountType', '2');
+    const toAccountRequest = this.http.get<StandingInstructionsResponse>(`/standinginstructions`, {
+      params: toAccountParams
+    });
+
+    // Combine both requests using forkJoin
+    return forkJoin([
+      fromAccountRequest,
+      toAccountRequest
+    ]).pipe(
+      map(
+        ([
+          fromResults,
+          toResults
+        ]) => {
+          // Combine the results, ensuring we have arrays to work with
+          const fromInstructions = fromResults?.pageItems || [];
+          const toInstructions = toResults?.pageItems || [];
+
+          // Create a Map to store unique instructions by id
+          const uniqueInstructions = new Map();
+
+          // Add all instructions to the map, overwriting duplicates
+          [
+            ...fromInstructions,
+            ...toInstructions
+          ].forEach((instruction) => {
+            if (instruction.id) {
+              uniqueInstructions.set(instruction.id, instruction);
+            }
+          });
+
+          // Convert map values back to array
+          const uniqueItems = Array.from(uniqueInstructions.values());
+
+          // Return combined results with metadata
+          return {
+            pageItems: uniqueItems,
+            totalFilteredRecords: uniqueItems.length,
+            totalRecords: uniqueItems.length
+          };
+        }
+      )
+    );
   }
 
   /**
@@ -313,8 +374,8 @@ export class SavingsService {
   }
 
   /**
-   * @param savingAccountId Savings Id
-   * @returns The notes for particular loan
+   * @param savingAccountId Savings Account Id of account to get data for.
+   * @returns {Observable<any>} Savings data.
    */
   getSavingsNotes(savingAccountId: string): Observable<any> {
     return this.http.get(`/savings/${savingAccountId}/notes`);
