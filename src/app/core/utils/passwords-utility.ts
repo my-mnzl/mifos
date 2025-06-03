@@ -8,11 +8,11 @@ import { environment } from 'environments/environment';
   providedIn: 'root'
 })
 export class PasswordsUtility {
-  minPasswordLength: number = environment.minPasswordLength | 12;
+  minPasswordLength: number = environment.minPasswordLength || 12;
   // password regex pattern
   public static PASSWORD_REGEX =
     '^(?!.*(.)\\1{1,})(?!.*\\s)(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^\\w\\s]).{' +
-    (environment.minPasswordLength | 12) +
+    (environment.minPasswordLength || 12) +
     ',50}$';
 
   public getPasswordValidators(): ValidatorFn[] {

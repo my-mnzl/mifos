@@ -26,8 +26,8 @@ export function passwordValidator(): ValidatorFn {
     if (!/^(?:(.)(?!\1))+$/.test(value)) {
       errors['repeated'] = 'Password must have not consecutive repeating characters';
     }
-    if (!/[@$!%*?&]/.test(value)) {
-      errors['specialChar'] = 'Password must contain at least one special character (@$!%*?&)';
+    if (!/[@$!%*?&-]/.test(value)) {
+      errors['specialChar'] = 'Password must contain at least one special character (@$!%*?&-)';
     }
 
     return Object.keys(errors).length > 0 ? errors : null;

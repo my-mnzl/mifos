@@ -10,7 +10,6 @@ import { PopoverService } from '../../configuration-wizard/popover/popover.servi
 
 /** Custom Dialog Component */
 import { PasswordsUtility } from 'app/core/utils/passwords-utility';
-import { confirmPasswordValidator } from 'app/login/reset-password/confirm-password.validator';
 import { ConfigurationWizardService } from 'app/configuration-wizard/configuration-wizard.service';
 import { ContinueSetupDialogComponent } from 'app/configuration-wizard/continue-setup-dialog/continue-setup-dialog.component';
 
@@ -75,45 +74,42 @@ export class CreateUserComponent implements OnInit, AfterViewInit {
    * Creates the user form.
    */
   createUserForm() {
-    this.userForm = this.formBuilder.group(
-      {
-        username: [
-          '',
-          Validators.required
-        ],
-        email: [
-          '',
-          [
-            Validators.required,
-            Validators.email
-          ]
-        ],
-        firstname: [
-          '',
-          [
-            Validators.required,
-            Validators.pattern('(^[A-z]).*')]
-        ],
-        lastname: [
-          '',
-          [
-            Validators.required,
-            Validators.pattern('(^[A-z]).*')]
-        ],
-        sendPasswordToEmail: [true],
-        passwordNeverExpires: [false],
-        officeId: [
-          '',
-          Validators.required
-        ],
-        staffId: [''],
-        roles: [
-          '',
-          Validators.required
+    this.userForm = this.formBuilder.group({
+      username: [
+        '',
+        Validators.required
+      ],
+      email: [
+        '',
+        [
+          Validators.required,
+          Validators.email
         ]
-      },
-      { validator: confirmPasswordValidator }
-    );
+      ],
+      firstname: [
+        '',
+        [
+          Validators.required,
+          Validators.pattern('(^[A-z]).*')]
+      ],
+      lastname: [
+        '',
+        [
+          Validators.required,
+          Validators.pattern('(^[A-z]).*')]
+      ],
+      sendPasswordToEmail: [true],
+      passwordNeverExpires: [false],
+      officeId: [
+        '',
+        Validators.required
+      ],
+      staffId: [''],
+      roles: [
+        '',
+        Validators.required
+      ]
+    });
   }
 
   /**
