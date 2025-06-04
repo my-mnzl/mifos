@@ -1,5 +1,5 @@
 /** Angular Imports */
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { UntypedFormGroup, UntypedFormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
@@ -17,7 +17,7 @@ import { minNumberValueValidator } from 'app/shared/validators/min-number-value.
   templateUrl: './edit-charge.component.html',
   styleUrls: ['./edit-charge.component.scss']
 })
-export class EditChargeComponent implements OnInit {
+export class EditChargeComponent {
   /** Selected Data. */
   chargeData: any;
   /** Charge form. */
@@ -62,11 +62,8 @@ export class EditChargeComponent implements OnInit {
   ) {
     this.route.data.subscribe((data: { chargesTemplate: any }) => {
       this.chargeData = data.chargesTemplate;
+      this.editChargeForm();
     });
-  }
-
-  ngOnInit() {
-    this.editChargeForm();
   }
 
   /**
@@ -96,7 +93,6 @@ export class EditChargeComponent implements OnInit {
       penalty: [this.chargeData.penalty],
       minCap: [
         this.chargeData.minCap || null,
-        ,
         [maxNumberValueValidator('maxCap')]
       ],
       maxCap: [
