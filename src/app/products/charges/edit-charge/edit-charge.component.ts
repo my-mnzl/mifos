@@ -27,7 +27,7 @@ import { STANDALONE_SHARED_IMPORTS } from 'app/standalone-shared.module';
     MatCheckbox
   ]
 })
-export class EditChargeComponent implements OnInit {
+export class EditChargeComponent {
   /** Selected Data. */
   chargeData: any;
   /** Charge form. */
@@ -72,11 +72,8 @@ export class EditChargeComponent implements OnInit {
   ) {
     this.route.data.subscribe((data: { chargesTemplate: any }) => {
       this.chargeData = data.chargesTemplate;
+      this.editChargeForm();
     });
-  }
-
-  ngOnInit() {
-    this.editChargeForm();
   }
 
   /**

@@ -1,4 +1,4 @@
-<div class="container">
+<div class="container" *ngIf="chargeForm">
   <mat-card>
     <form [formGroup]="chargeForm" (ngSubmit)="submit()">
       <mat-card-content>
@@ -7,7 +7,7 @@
             <mat-label>{{ 'labels.inputs.Charge Applies To' | translate }}</mat-label>
             <mat-select required formControlName="chargeAppliesTo">
               <mat-option
-                *ngFor="let chargeAppliesTo of chargeData.chargeAppliesToOptions"
+                *ngFor="let chargeAppliesTo of chargeData?.chargeAppliesToOptions"
                 [value]="chargeAppliesTo.id"
               >
                 {{ chargeAppliesTo.value | translateKey: 'catalogs' }}
@@ -20,7 +20,7 @@
           <mat-form-field class="flex-48">
             <mat-label>{{ 'labels.inputs.Name' | translate }}</mat-label>
             <input matInput required autofocus formControlName="name" />
-            <mat-error *ngIf="chargeForm.controls.name.hasError('required')">
+            <mat-error *ngIf="chargeForm?.controls?.name?.hasError('required')">
               {{ 'labels.inputs.Name' | translate }} {{ 'labels.commons.is' | translate }}
               <strong>{{ 'labels.commons.required' | translate }}</strong>
             </mat-error>
