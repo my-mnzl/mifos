@@ -1,5 +1,11 @@
 <div class="container">
   <mat-card>
+    <!-- Warning message for past dates -->
+    <div *ngIf="hasPastDatePeriods()" class="warning-message">
+      <mat-icon>warning</mat-icon>
+      <span><em>Note: past periods cannot be modified. Only future periods will be saved.</em></span>
+    </div>
+
     <form [formGroup]="floatingRateForm" (ngSubmit)="submit()">
       <mat-card-content>
         <div fxLayout="row wrap" fxLayout.lt-md="column" fxLayoutGap="15%">
@@ -134,7 +140,12 @@
           </ng-container>
 
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+          <tr
+            mat-row
+            *matRowDef="let row; columns: displayedColumns"
+            [class.past-date-row]="isPastDate(row)"
+            [matTooltip]="isPastDate(row) ? 'This period cannot be modified' : ''"
+          ></tr>
         </table>
 
         <mat-paginator [pageSizeOptions]="[10, 25, 50, 100]" showFirstLastButtons></mat-paginator>

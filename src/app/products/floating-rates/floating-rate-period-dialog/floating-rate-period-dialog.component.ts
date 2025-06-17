@@ -36,12 +36,15 @@ export class FloatingRatePeriodDialogComponent implements OnInit {
   ngOnInit() {
     this.minDate = this.settingsService.businessDate;
     let rowDisabled = false;
-    if (this.data && new Date(this.data.fromDate) < this.minDate) {
-      rowDisabled = true;
+
+    // Check if this is an existing period with a past date
+    if (this.data && this.data.fromDate) {
+      const existingDate = new Date(this.data.fromDate);
+      if (existingDate < this.minDate) {
+        rowDisabled = true;
+      }
     }
-    if (this.data.isNew) {
-      rowDisabled = false;
-    }
+
     this.floatingRatePeriodForm = this.formBuilder.group({
       fromDate: [
         { value: this.data ? new Date(this.data.fromDate) : '', disabled: rowDisabled },
@@ -60,6 +63,15 @@ export class FloatingRatePeriodDialogComponent implements OnInit {
    * Closes the dialog and returns value of the form.
    */
   submit() {
-    this.dialogRef.close(this.floatingRatePeriodForm.value);
+    const formValue = this.floatingRatePeriodForm.value;
+
+    // Validate that the selected date is not in the past
+    if (formValue.fromDate && formValue.fromDate < this.minDate) {
+      // This should not happen due to the minDate constraint, but adding as a safety check
+      console.warn('Attempted to submit a past date for floating rate period');
+      return;
+    }
+
+    this.dialogRef.close(formValue);
   }
 }
