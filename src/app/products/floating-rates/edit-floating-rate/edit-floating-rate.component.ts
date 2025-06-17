@@ -225,11 +225,32 @@ export class EditFloatingRateComponent implements OnInit {
   }
 
   /**
+   * Checks if a floating rate period has a past date.
+   * @param {any} ratePeriod Floating Rate Period.
+   * @returns {boolean} True if the period has a past date.
+   */
+  isPastDate(ratePeriod: any): boolean {
+    const currentBusinessDate = this.settingsService.businessDate;
+    const periodDate = this.dateUtils.convertToDate(ratePeriod.fromDate, this.dateFormat);
+    return periodDate < currentBusinessDate;
+  }
+
+  /**
+   * Checks if there are any periods with past dates.
+   * @returns {boolean} True if there are periods with past dates.
+   */
+  hasPastDatePeriods(): boolean {
+    return this.floatingRatePeriodsData.some((period: any) => this.isPastDate(period));
+  }
+
+  /**
    * Submits the floating rate form and creates floating rate,
    * if successful redirects to view created floating rate.
    */
   submit() {
-    this.floatingRatePeriodsData.map((floatingRatePeriod) => {
+    const filteredPeriods = this.floatingRatePeriodsData.filter((period: any) => !this.isPastDate(period));
+
+    filteredPeriods.map((floatingRatePeriod) => {
       floatingRatePeriod.modifiedOn = undefined;
       floatingRatePeriod.createdOn = undefined;
       floatingRatePeriod.id = undefined;
@@ -240,8 +261,7 @@ export class EditFloatingRateComponent implements OnInit {
       floatingRatePeriod.dateFormat = this.dateFormat;
       floatingRatePeriod.fromDate = this.dateUtils.formatDate(floatingRatePeriod.fromDate, this.dateFormat);
     });
-    this.floatingRateForm.value.ratePeriods =
-      this.floatingRatePeriodsData.length > 0 ? this.floatingRatePeriodsData : undefined;
+    this.floatingRateForm.value.ratePeriods = filteredPeriods.length > 0 ? filteredPeriods : undefined;
     this.productsService
       .updateFloatingRate(this.route.snapshot.paramMap.get('id'), this.floatingRateForm.value)
       .subscribe((response: any) => {
