@@ -2751,6 +2751,7 @@
       "Business Date functionality is not enabled": "The Business Date functionality is not enabled. If you need that, Go to Global Configurations and enable the configuration",
       "Button for accounting department": "This button opens the menu to access the system tools required by the accounting department.",
       "Button for individual account": "This button will be used for individual accounts, groups and centers",
+      "Cached Business Date": "Cached Business Date",
       "Cancel Pending Sale": "Cancel Pending Sale",
       "Cashier Transactions": "Cashier Transactions",
       "Center Actions": "Center Actions",

@@ -2,6 +2,15 @@
   <mat-divider class="divider align-center"></mat-divider>
   <div class="layout-column m-b-20 content-wrapper footer-center">
     <table class="versions">
+      <tr *ngIf="!isBusinessDateDefined">
+        <td class="footer-content">{{ 'labels.text.Cached Business Date' | translate }}:</td>
+        <td class="right footer-content business-date">
+          <b>
+            <fa-icon icon="refresh" size="sm" (click)="setCachedBusinessDate()"></fa-icon>
+            {{ cachedBusinessDate | date: 'EEEE, MMMM dd, y' }}</b
+          >
+        </td>
+      </tr>
       <tr>
         <td class="footer-content">Mifos</td>
         <td class="right footer-content">
