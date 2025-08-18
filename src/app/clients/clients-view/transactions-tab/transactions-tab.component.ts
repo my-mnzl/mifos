@@ -4,6 +4,13 @@ import { UntypedFormControl } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatSortModule } from '@angular/material/sort';
+import { MatTableModule } from '@angular/material/table';
+import { TranslateModule } from '@ngx-translate/core';
+import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule } from '@angular/forms';
 import { Dates } from 'app/core/utils/dates';
 import { ClientsService } from 'app/clients/clients.service';
 import { LoansService } from 'app/loans/loans.service';
@@ -18,7 +25,17 @@ import { LoanTransactionType } from 'app/loans/models/loan-transaction-type.mode
 @Component({
   selector: 'mifosx-client-transactions-tab',
   templateUrl: './transactions-tab.component.html',
-  styleUrls: ['./transactions-tab.component.scss']
+  styleUrls: ['./transactions-tab.component.scss'],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatCheckboxModule,
+    MatPaginatorModule,
+    MatSortModule,
+    MatTableModule,
+    TranslateModule
+  ],
+  standalone: true
 })
 export class ClientTransactionsTabComponent implements OnInit {
   /** Loan Details Data */

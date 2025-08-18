@@ -69,6 +69,7 @@ import { ClientTransactionsTabComponent } from './clients-view/transactions-tab/
     ClientsRoutingModule,
     PipesModule,
     DirectivesModule,
+    ClientTransactionsTabComponent,
     ClientsComponent,
     ClientsViewComponent,
     GeneralTabComponent,
@@ -116,8 +117,7 @@ import { ClientTransactionsTabComponent } from './clients-view/transactions-tab/
     ClientFamilyMemberDialogComponent,
     CaptureImageDialogComponent,
     AddClientCollateralComponent,
-    ClientDatatableStepComponent,
-    ClientTransactionsTabComponent
+    ClientDatatableStepComponent
   ],
   providers: []
 })
