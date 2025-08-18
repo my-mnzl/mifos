@@ -1,14 +1,13 @@
 const { gitDescribeSync } = require('git-describe');
 const { resolve, relative } = require('path');
 const { writeFileSync } = require('fs-extra');
-const moment = require('moment');
 
 const gitInfo = gitDescribeSync({
   dirtyMark: false,
   dirtySemver: false
 });
 
-gitInfo.version = moment().format('YYMMDD');
+gitInfo.version = '1.12.1';
 
 const file = resolve(__dirname, '.', 'src', 'environments', '.env.ts');
 writeFileSync(
@@ -20,7 +19,7 @@ export default {
     'version': '${gitInfo.version}',
     'hash': '${gitInfo.hash}'
   },
-  'allow_switching_backend_instance': true
+  'allow_switching_backend_instance': false
 };
 /* tslint:enable */
 `,
