@@ -1,4 +1,10 @@
-<form class="layout-column" [formGroup]="loginForm" (ngSubmit)="login()" id="login-form">
+<form
+  class="layout-column"
+  [formGroup]="loginForm"
+  (ngSubmit)="login()"
+  id="login-form"
+  *ngIf="!environment.oauth?.enabled"
+>
   <mat-form-field class="login-input flex-align-center">
     <span matPrefix class="m-r-10">
       <fa-icon icon="user-circle" size="lg"></fa-icon>
@@ -53,3 +59,26 @@
     {{ 'labels.links.Forgot Password?' | translate }}
   </button>
 </form>
+
+<div class="oauth-login-container" *ngIf="environment.oauth?.enabled">
+  <div class="oauth-header">
+    <div class="oauth-icon">
+      <fa-icon icon="shield-alt" size="3x"></fa-icon>
+    </div>
+    <h2>
+      {{ 'labels.authentication.Log in with provider' | translate: { provider: environment.oauth.providerName } }}
+    </h2>
+    <p>{{ 'labels.authentication.You will be redirected' | translate }}</p>
+  </div>
+
+  <button
+    mat-raised-button
+    color="primary"
+    class="oauth-login-button flex-align-center"
+    (click)="oauthLogin()"
+    [disabled]="loading"
+  >
+    {{ 'labels.authentication.Log in' | translate }}
+    <mat-spinner [diameter]="20" *ngIf="loading"></mat-spinner>
+  </button>
+</div>

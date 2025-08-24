@@ -292,11 +292,17 @@
         "payableDividends": "Payable Dividends"
       }
     },
+    "authentication": {
+      "Log in": "Log in",
+      "Log in with provider": "Log in with {{provider}}",
+      "You will be redirected": "You will be redirected to your organization's authentication provider"
+    },
     "breadcrumbs": {
       "Home": "Home"
     },
     "buttons": {
       "Accept Transfer": "Accept Transfer",
+      "Acknowledge": "Acknowledge",
       "Actions": "Actions",
       "Activate": "Activate",
       "Activate Self Service User": "Activate Self Service User",
@@ -3172,6 +3178,7 @@
       "No report data was generated": "No report data was generated",
       "No transaction was found": "No transaction was found.",
       "Notes": "Notes",
+      "Notice": "Notice",
       "Notification Service Configuration": "Notification Service Configuration",
       "Notification": "Notification",
       "Notifications": "Notifications",
@@ -3395,7 +3402,7 @@
       "View logged history": "View logged history of standing instructions",
       "View, edit and delete employees of your organization": "With this option, you may view, edit and delete employees of your organization.",
       "Warning": "Warning",
-      "Warning message": "This system is for authorized use only. Unauthorized access will result in possible legal action. By accessing this system, you acknowledge that you are authorized to do so and that all data stored and processed here is confidential.",
+      "Warning message": "This system is for use by authorized MNZL employees only.",
       "Welcome": "Welcome",
       "Welcome page logo from anywhere": "This logo will return the user to the welcome page from anywhere in the system.",
       "Web": "Web",

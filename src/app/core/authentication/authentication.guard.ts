@@ -29,6 +29,12 @@ export class AuthenticationGuard {
    * @returns {boolean} True if user is authenticated.
    */
   canActivate(): boolean {
+    // Allow access to OAuth callback route without authentication
+    // This route handles the authentication process itself
+    if (window.location.pathname?.includes('/auth/callback')) {
+      return true;
+    }
+
     if (this.authenticationService.isAuthenticated()) {
       return true;
     }

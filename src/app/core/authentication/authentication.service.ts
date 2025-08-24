@@ -1,421 +1,608 @@
 /** Angular Imports */
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
+import { HttpHeaders, HttpParams } from '@angular/common/http';
 
-/** rxjs Imports */
-import { Observable, of } from 'rxjs';
-import { map } from 'rxjs/operators';
+/** RxJS */
+import { Observable, of, throwError } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
 
-/** Custom Services */
+/** App Services */
+import { HttpService } from '../http/http.service';
 import { AlertService } from '../alert/alert.service';
 
-/** Custom Interceptors */
-import { AuthenticationInterceptor } from './authentication.interceptor';
-
-/** Environment Configuration */
+/** Environment */
 import { environment } from '../../../environments/environment';
 
-/** Custom Models */
-import { LoginContext } from './login-context.model';
-import { Credentials } from './credentials.model';
-import { OAuth2Token } from './o-auth2-token.model';
+/** Types */
+import { OAuth2Token, OAuth2UserProfile, OAuth2Credentials } from './o-auth2-token.model';
 
-/**
- * Authentication workflow.
- */
-@Injectable()
+// Token management service
+class TokenService {
+  private currentToken: string | null = null;
+  private currentTokenType: 'Bearer' | 'Basic' = 'Bearer';
+
+  setToken(token: string, type: 'Bearer' | 'Basic' = 'Bearer') {
+    this.currentToken = token;
+    this.currentTokenType = type;
+  }
+
+  getToken(): string | null {
+    return this.currentToken;
+  }
+
+  getTokenType(): 'Bearer' | 'Basic' {
+    return this.currentTokenType;
+  }
+
+  clearToken() {
+    this.currentToken = null;
+  }
+
+  getAuthorizationHeader(): string | null {
+    if (!this.currentToken) return null;
+    const header = `${this.currentTokenType} ${this.currentToken}`;
+    return header;
+  }
+}
+
+// Global token service instance
+export const tokenService = new TokenService();
+
+export interface LoginContext {
+  username?: string;
+  password?: string;
+  remember: boolean;
+}
+
+@Injectable({ providedIn: 'root' })
 export class AuthenticationService {
-  changePassword(userId: string, passwordObj: any) {
-    return this.http.put(`/users/${userId}`, passwordObj);
-  }
-  // User logged in boolean
-  private userLoggedIn: boolean;
+  private storage: Storage = localStorage;
+  private rememberMe = false;
+  private userLoggedIn = false;
 
-  /** Denotes whether the user credentials should persist through sessions. */
-  private rememberMe: boolean;
-  /**
-   * Denotes the type of storage:
-   *
-   * Session Storage: User credentials should not persist through sessions.
-   *
-   * Local Storage: User credentials should persist through sessions.
-   */
-  private storage: any;
-  /** User credentials. */
+  private authorizationEndpoint?: string;
+  private tokenEndpoint?: string;
+  private userinfoEndpoint?: string;
+  private endSessionEndpoint?: string;
 
-  private credentials: Credentials;
-  private dialogShown = false;
-  /** Key to store credentials in storage. */
-  private credentialsStorageKey = 'mifosXCredentials';
-  /** Key to store oauth token details in storage. */
-  private oAuthTokenDetailsStorageKey = 'mifosXOAuthTokenDetails';
-  /** Key to store two factor authentication token in storage. */
-  private twoFactorAuthenticationTokenStorageKey = 'mifosXTwoFactorAuthenticationToken';
-
-  /**
-   * Initializes the type of storage and authorization headers depending on whether
-   * credentials are presently in storage or not.
-   * @param {HttpClient} http Http Client to send requests.
-   * @param {AlertService} alertService Alert Service.
-   * @param {AuthenticationInterceptor} authenticationInterceptor Authentication Interceptor.
-   */
   constructor(
-    private http: HttpClient,
-    private alertService: AlertService,
-    private authenticationInterceptor: AuthenticationInterceptor
-  ) {
-    this.userLoggedIn = false;
-    this.rememberMe = false;
-    this.storage = sessionStorage;
-    const savedCredentials = JSON.parse(
-      sessionStorage.getItem(this.credentialsStorageKey) || localStorage.getItem(this.credentialsStorageKey)
-    );
-    if (savedCredentials) {
-      if (savedCredentials.rememberMe) {
-        this.rememberMe = true;
-        this.storage = localStorage;
-      }
-      const twoFactorAccessToken = JSON.parse(this.storage.getItem(this.twoFactorAuthenticationTokenStorageKey));
-      if (environment.oauth.enabled) {
-        this.refreshOAuthAccessToken();
-      } else {
-        authenticationInterceptor.setAuthorizationToken(savedCredentials.base64EncodedAuthenticationKey);
-      }
-      if (twoFactorAccessToken) {
-        authenticationInterceptor.setTwoFactorAccessToken(twoFactorAccessToken.token);
-      }
-    }
+    private readonly http: HttpService,
+    private readonly alertService: AlertService
+  ) {}
+
+  getUserLoggedIn(): boolean {
+    return this.userLoggedIn;
   }
 
-  /**
-   * Authenticates the user.
-   * @param {LoginContext} loginContext Login parameters.
-   * @returns {Observable<boolean>} True if authentication is successful.
-   */
-  login(loginContext: LoginContext) {
-    this.alertService.alert({ type: 'Authentication Start', message: 'Please wait...' });
-    this.rememberMe = loginContext.remember;
+  login(loginContext: LoginContext): Observable<boolean> {
+    this.alertService.alert({ type: 'Authentication Start', message: 'Redirecting to sign in…' });
+    this.rememberMe = !!loginContext.remember;
     this.storage = this.rememberMe ? localStorage : sessionStorage;
 
-    if (environment.oauth.enabled) {
-      let httpParams = new HttpParams();
-      httpParams = httpParams.set('username', loginContext.username);
-      httpParams = httpParams.set('password', loginContext.password);
-      httpParams = httpParams.set('client_id', `${environment.oauth.appId}`);
-      httpParams = httpParams.set('grant_type', 'password');
-      let headers = new HttpHeaders();
-      headers = headers.set('Content-Type', 'application/x-www-form-urlencoded');
-      return this.http
-        .disableApiPrefix()
-        .post(`${environment.oauth.serverUrl}/token`, httpParams.toString(), { headers: headers })
-        .pipe(
-          map((tokenResponse: OAuth2Token) => {
-            this.getUserDetails(tokenResponse);
-            return of(true);
-          })
-        );
-    } else {
+    if (!environment?.oauth?.enabled) {
+      // Legacy fallback - this should be removed in favor of OAuth2
       return this.http
         .post('/authentication', { username: loginContext.username, password: loginContext.password })
         .pipe(
-          map((credentials: Credentials) => {
+          map((credentials: any) => {
             this.onLoginSuccess(credentials);
-            return of(true);
+            return true;
           })
         );
     }
-  }
 
-  /**
-   * Retrieves the user details after oauth2 authentication.
-   *
-   * Sets the oauth2 token refresh time.
-   * @param {OAuth2Token} tokenResponse OAuth2 Token details.
-   */
-  private getUserDetails(tokenResponse: OAuth2Token) {
-    this.refreshTokenOnExpiry(tokenResponse.expires_in);
-    let headers = new HttpHeaders();
-    headers = headers.set('Authorization', 'bearer ' + tokenResponse.access_token);
-    this.http
-      .disableApiPrefix()
-      .get(`${environment.serverUrl}/userdetails`, { headers: headers })
-      .subscribe((credentials: Credentials) => {
-        this.onLoginSuccess(credentials);
-        if (!credentials.shouldRenewPassword) {
-          this.storage.setItem(this.oAuthTokenDetailsStorageKey, JSON.stringify(tokenResponse));
-        }
-      });
-  }
+    const issuer = this.requireIssuer();
+    const scope = environment.oauth.scope || 'openid profile email offline_access';
+    const clientId = environment.oauth.clientId;
+    const redirectUri = environment.oauth.redirectUri;
 
-  /**
-   * Sets the oauth2 token to refresh on expiry.
-   * @param {number} expiresInTime OAuth2 token expiry time in seconds.
-   */
-  private refreshTokenOnExpiry(expiresInTime: number) {
-    setTimeout(() => this.refreshOAuthAccessToken(), expiresInTime * 1000);
-  }
-
-  /**
-   * Refreshes the oauth2 authorization token.
-   */
-  private refreshOAuthAccessToken() {
-    var oAuthRefreshToken = JSON.parse(this.storage.getItem(this.oAuthTokenDetailsStorageKey));
-    if (oAuthRefreshToken == null) {
-      return;
+    if (!clientId || !redirectUri) {
+      return throwError(() => new Error('OAuth configuration missing client_id or redirectUri.'));
     }
-    oAuthRefreshToken = JSON.parse(this.storage.getItem(this.oAuthTokenDetailsStorageKey)).refresh_token;
-    this.authenticationInterceptor.removeAuthorization();
-    const credentials = JSON.parse(this.storage.getItem(this.credentialsStorageKey));
-    let httpParams = new HttpParams();
-    httpParams = httpParams.set('username', credentials.username);
-    httpParams = httpParams.set('client_id', `${environment.oauth.appId}`);
-    httpParams = httpParams.set('refresh_token', oAuthRefreshToken);
-    httpParams = httpParams.set('grant_type', 'refresh_token');
-    let headers = new HttpHeaders();
-    headers = headers.set('Content-Type', 'application/x-www-form-urlencoded');
+
+    return this.discover(issuer).pipe(
+      switchMap(() => this.startPkceLogin(issuer, clientId, redirectUri, scope)),
+      map(() => true)
+    );
+  }
+
+  handleRedirectCallback(): Observable<boolean> {
+    if (!environment?.oauth?.enabled) {
+      return of(false);
+    }
+
+    // If user is already authenticated, return true
+    if (this.isAuthenticated()) {
+      return of(true);
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
+    const state = params.get('state');
+
+    if (!code) {
+      return throwError(() => new Error('No authorization code found on callback URL.'));
+    }
+
+    const expectedState = this.storage.getItem('oauth_state');
+    if (!state || state !== expectedState) {
+      return throwError(() => new Error('OAuth state mismatch.'));
+    }
+
+    const clientId = environment.oauth.clientId;
+    const redirectUri = environment.oauth.redirectUri;
+    const codeVerifier = this.storage.getItem('pkce_verifier') || '';
+    const tokenEndpoint = this.storage.getItem('token_endpoint') || this.tokenEndpoint;
+
+    if (!tokenEndpoint) {
+      return throwError(() => new Error('Token endpoint not available. Did discovery run?'));
+    }
+
+    const body = new HttpParams()
+      .set('grant_type', 'authorization_code')
+      .set('code', code)
+      .set('redirect_uri', redirectUri)
+      .set('client_id', clientId)
+      .set('code_verifier', codeVerifier);
+
+    const headers = new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' });
+
     return this.http
       .disableApiPrefix()
-      .post(`${environment.oauth.serverUrl}/token`, httpParams.toString(), { headers: headers })
-      .subscribe((tokenResponse: OAuth2Token) => {
-        this.storage.setItem(this.oAuthTokenDetailsStorageKey, JSON.stringify(tokenResponse));
-        this.authenticationInterceptor.setAuthorizationToken(tokenResponse.access_token);
-        this.refreshTokenOnExpiry(tokenResponse.expires_in);
-        const credentials = JSON.parse(this.storage.getItem(this.credentialsStorageKey));
-        credentials.accessToken = tokenResponse.access_token;
-        this.storage.setItem(this.credentialsStorageKey, JSON.stringify(credentials));
-      });
+      .post(tokenEndpoint, body.toString(), { headers })
+      .pipe(
+        switchMap((tokens: OAuth2Token) => {
+          this.persistTokens(tokens);
+          return this.getUserDetails(tokens).pipe(map(() => true));
+        }),
+        catchError((err) => {
+          this.alertService.alert({ type: 'Authentication Error', message: 'Token exchange failed.' });
+          return throwError(() => err);
+        }),
+        map((ok) => {
+          this.clearAuthQueryParams();
+          return ok;
+        })
+      );
   }
 
-  /**
-   * Sets the authorization token followed by one of the following:
-   *
-   * Sends an alert if two factor authentication is required.
-   *
-   * Sends an alert if password has expired and requires a reset.
-   *
-   * Sends an alert on successful login.
-   * @param {Credentials} credentials Authenticated user credentials.
-   */
-  private onLoginSuccess(credentials: Credentials) {
-    this.userLoggedIn = true;
-    if (environment.oauth.enabled) {
-      this.authenticationInterceptor.setAuthorizationToken(credentials.accessToken);
-    } else {
-      this.authenticationInterceptor.setAuthorizationToken(credentials.base64EncodedAuthenticationKey);
-    }
-    if (credentials.isTwoFactorAuthenticationRequired) {
-      this.credentials = credentials;
-      this.alertService.alert({
-        type: 'Two Factor Authentication Required',
-        message: 'Two Factor Authentication Required'
-      });
-    } else {
-      if (credentials.shouldRenewPassword) {
-        this.credentials = credentials;
-        this.alertService.alert({
-          type: 'Password Expired',
-          message: 'Your password has expired, please reset your password!'
-        });
-      } else {
-        this.setCredentials(credentials);
-        this.alertService.alert({
-          type: 'Authentication Success',
-          message: `${credentials.username} successfully logged in!`
-        });
-        delete this.credentials;
-      }
-    }
-  }
+  logout(): Observable<void> {
+    const idToken = this.storage.getItem('id_token');
+    const endSession = this.endSessionEndpoint || this.storage.getItem('end_session_endpoint') || '';
+    const postLogoutRedirect = environment.oauth.postLogoutRedirectUri || environment.oauth.redirectUri;
 
-  /**
-   * Logout ongoing Oauth2 session.
-   */
-  private logoutAuthSession() {
-    const oAuthRefreshToken = JSON.parse(this.storage.getItem(this.oAuthTokenDetailsStorageKey)).refresh_token;
-    const credentials = JSON.parse(this.storage.getItem(this.credentialsStorageKey));
-    this.authenticationInterceptor.removeAuthorizationTenant();
-    let httpParams = new HttpParams();
-    httpParams = httpParams.set('username', credentials.username);
-    httpParams = httpParams.set('client_id', `${environment.oauth.appId}`);
-    httpParams = httpParams.set('refresh_token', oAuthRefreshToken);
-    let headers = new HttpHeaders();
-    headers = headers.set('Content-Type', 'application/x-www-form-urlencoded');
-    return this.http
-      .disableApiPrefix()
-      .post(`${environment.oauth.serverUrl}/logout`, httpParams.toString(), { headers: headers })
-      .subscribe();
-  }
-
-  /**
-   * Logs out the authenticated user and clears the credentials from storage.
-   * @returns {Observable<boolean>} True if the user was logged out successfully.
-   */
-  logout(): Observable<boolean> {
-    const twoFactorToken = JSON.parse(this.storage.getItem(this.twoFactorAuthenticationTokenStorageKey));
-    if (twoFactorToken) {
-      this.http.post('/twofactor/invalidate', { token: twoFactorToken.token }).subscribe();
-      this.authenticationInterceptor.removeTwoFactorAuthorization();
-    }
-    const oAuthRefreshToken = JSON.parse(this.storage.getItem(this.oAuthTokenDetailsStorageKey));
-    if (oAuthRefreshToken) {
-      this.logoutAuthSession();
-    }
-    this.authenticationInterceptor.removeAuthorization();
-    this.setCredentials();
-    this.resetDialog();
+    this.clearTokens();
+    tokenService.clearToken();
     this.userLoggedIn = false;
-    return of(true);
-  }
 
-  /**
-   * Checks if the two factor access token for authenticated user is valid.
-   * @returns {boolean} True if the two factor access token is valid or two factor authentication is not required.
-   */
-  twoFactorAccessTokenIsValid(): boolean {
-    const twoFactorAccessToken = JSON.parse(this.storage.getItem(this.twoFactorAuthenticationTokenStorageKey));
-    if (twoFactorAccessToken) {
-      return new Date().getTime() < twoFactorAccessToken.validTo;
+    if (endSession && idToken) {
+      const url = new URL(endSession);
+      url.searchParams.set('id_token_hint', idToken);
+      if (postLogoutRedirect) {
+        url.searchParams.set('post_logout_redirect_uri', postLogoutRedirect);
+      }
+      window.location.assign(url.toString());
     }
-    return true;
+
+    return of(void 0);
   }
 
   /**
-   * Checks if the user is authenticated.
-   * @returns {boolean} True if the user is authenticated.
+   * Check if the current access token is expired
+   */
+  isTokenExpired(): boolean {
+    const expiresAt = this.storage.getItem('expires_at');
+    if (!expiresAt) return true;
+
+    const expirationTime = parseInt(expiresAt, 10);
+    const currentTime = Date.now();
+
+    // Consider token expired if it expires within the next 30 seconds
+    return currentTime >= expirationTime - 30000;
+  }
+
+  /**
+   * Get the current access token
+   */
+  getAccessToken(): string | null {
+    return this.storage.getItem('access_token');
+  }
+
+  /**
+   * Check if user is authenticated
    */
   isAuthenticated(): boolean {
-    return !!(
-      JSON.parse(
-        sessionStorage.getItem(this.credentialsStorageKey) || localStorage.getItem(this.credentialsStorageKey)
-      ) && this.twoFactorAccessTokenIsValid()
-    );
+    const token = this.getAccessToken();
+    return !!token && !this.isTokenExpired() && this.userLoggedIn;
   }
 
   /**
-   * Gets the user credentials.
-   * @returns {Credentials} The user credentials if the user is authenticated otherwise null.
+   * Check if the current URL is an OAuth callback URL
    */
-  getCredentials(): Credentials | null {
-    return JSON.parse(this.storage.getItem(this.credentialsStorageKey));
+  isOAuthCallback(): boolean {
+    return window.location.pathname?.includes('/auth/callback');
   }
 
   /**
-   * Sets the user credentials.
-   *
-   * The credentials may be persisted across sessions by setting the `rememberMe` parameter to true.
-   * Otherwise, the credentials are only persisted for the current session.
-   *
-   * @param {Credentials} credentials Authenticated user credentials.
+   * Check if the current URL has OAuth callback parameters
    */
-  private setCredentials(credentials?: Credentials) {
-    if (credentials) {
-      credentials.rememberMe = this.rememberMe;
-      this.storage.setItem(this.credentialsStorageKey, JSON.stringify(credentials));
-    } else {
-      this.storage.removeItem(this.credentialsStorageKey);
-      this.storage.removeItem(this.oAuthTokenDetailsStorageKey);
-      this.storage.removeItem(this.twoFactorAuthenticationTokenStorageKey);
+  hasOAuthCallbackParams(): boolean {
+    const params = new URLSearchParams(window.location.search);
+    return !!params.get('code') && !!params.get('state');
+  }
+
+  /**
+   * Initialize OAuth authentication if callback parameters are present
+   */
+  initializeOAuthIfNeeded(): Observable<boolean> {
+    if (this.hasOAuthCallbackParams()) {
+      return this.handleRedirectCallback();
     }
+    return of(false);
   }
 
   /**
-   * Following functions are for two factor authentication and require
-   * first level authorization headers to be setup for the requests.
+   * Check and refresh tokens if needed
    */
+  checkAndRefreshTokens(): Observable<boolean> {
+    if (!this.isTokenExpired()) {
+      return of(true);
+    }
 
-  /**
-   * Gets the two factor authentication delivery methods available for the user.
-   */
-  getDeliveryMethods() {
-    return this.http.get('/twofactor');
-  }
+    const refreshToken = this.storage.getItem('refresh_token');
+    if (!refreshToken) {
+      // No refresh token available, user needs to re-authenticate
+      this.clearTokens();
+      this.userLoggedIn = false;
+      return of(false);
+    }
 
-  showDialog() {
-    this.dialogShown = true;
-  }
-
-  resetDialog() {
-    this.dialogShown = false;
-  }
-
-  hasDialogBeenShown() {
-    return this.dialogShown;
-  }
-
-  /**
-   * Requests OTP to be sent via the given delivery method.
-   * @param {any} deliveryMethod Delivery method for the OTP.
-   */
-  requestOTP(deliveryMethod: any) {
-    let httpParams = new HttpParams();
-    httpParams = httpParams.set('deliveryMethod', deliveryMethod.name);
-    httpParams = httpParams.set('extendedToken', this.rememberMe.toString());
-    return this.http.post(`/twofactor`, {}, { params: httpParams });
-  }
-
-  /**
-   * Validates the OTP and authenticates the user on success.
-   * @param {string} otp
-   */
-  validateOTP(otp: string) {
-    const httpParams = new HttpParams().set('token', otp);
-    return this.http.post(`/twofactor/validate`, {}, { params: httpParams }).pipe(
-      map((response) => {
-        this.onOTPValidateSuccess(response);
+    // Try to refresh the tokens
+    return this.refreshTokens().pipe(
+      map(() => true),
+      catchError((err) => {
+        // Refresh failed, clear tokens and user needs to re-authenticate
+        this.clearTokens();
+        this.userLoggedIn = false;
+        return of(false);
       })
     );
   }
 
   /**
-   * Sets the two factor authorization token followed by one of the following:
-   *
-   * Sends an alert if password has expired and requires a reset.
-   *
-   * Sends an alert on successful login.
-   * @param {any} response Two factor authentication token details.
+   * Clear OAuth state and redirect to login
    */
-  private onOTPValidateSuccess(response: any) {
-    this.authenticationInterceptor.setTwoFactorAccessToken(response.token);
-    if (this.credentials.shouldRenewPassword) {
-      this.alertService.alert({
-        type: 'Password Expired',
-        message: 'Your password has expired, please reset your password!'
-      });
-    } else {
-      this.setCredentials(this.credentials);
-      this.alertService.alert({
-        type: 'Authentication Success',
-        message: `${this.credentials.username} successfully logged in!`
-      });
-      delete this.credentials;
-      this.storage.setItem(this.twoFactorAuthenticationTokenStorageKey, JSON.stringify(response));
-    }
+  clearOAuthState(): void {
+    this.clearTokens();
+    this.userLoggedIn = false;
+    // Clear any OAuth-related query parameters
+    this.clearAuthQueryParams();
   }
 
   /**
-   * Resets the user's password and authenticates the user.
-   * @param {any} passwordDetails New password.
+   * Get user credentials (for backward compatibility)
    */
-  resetPassword(passwordDetails: any) {
-    return this.http.put(`/users/${this.credentials.userId}`, passwordDetails).pipe(
-      map(() => {
-        this.alertService.alert({ type: 'Password Reset Success', message: `Your password was sucessfully reset!` });
-        this.authenticationInterceptor.removeAuthorization();
-        this.authenticationInterceptor.removeTwoFactorAuthorization();
-        const loginContext: LoginContext = {
-          username: this.credentials.username,
-          password: passwordDetails.password,
-          remember: this.rememberMe
+  getCredentials(): any {
+    if (environment.oauth.enabled) {
+      // For OAuth, return OAuth credentials
+      const accessToken = this.getAccessToken();
+      const idToken = this.storage.getItem('id_token');
+      const refreshToken = this.storage.getItem('refresh_token');
+      const userInfoString = this.storage.getItem('user_info');
+      const userInfo = userInfoString ? JSON.parse(userInfoString) : {};
+      const { user, groups, permissions } = userInfo;
+
+      if (accessToken) {
+        return {
+          accessToken,
+          idToken,
+          refreshToken,
+          user,
+          groups,
+          permissions
         };
-        this.login(loginContext).subscribe();
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Reset password (for backward compatibility)
+   */
+  resetPassword(resetPasswordData: any): Observable<any> {
+    // This method is not applicable for OAuth
+    // Return error or redirect to appropriate flow
+    return throwError(() => new Error('Password reset not available with OAuth authentication.'));
+  }
+
+  /**
+   * Get delivery methods for 2FA (for backward compatibility)
+   */
+  getDeliveryMethods(): Observable<any> {
+    // This method is not applicable for OAuth
+    return throwError(() => new Error('Two-factor authentication not available with OAuth authentication.'));
+  }
+
+  /**
+   * Request OTP for 2FA (for backward compatibility)
+   */
+  requestOTP(deliveryMethod: any): Observable<any> {
+    // This method is not applicable for OAuth
+    return throwError(() => new Error('Two-factor authentication not available with OAuth authentication.'));
+  }
+
+  /**
+   * Validate OTP for 2FA (for backward compatibility)
+   */
+  validateOTP(otp: string): Observable<any> {
+    // This method is not applicable for OAuth
+    return throwError(() => new Error('Two-factor authentication not available with OAuth authentication.'));
+  }
+
+  /**
+   * Change password (for backward compatibility)
+   */
+  changePassword(userId: string, changePasswordData: any): Observable<any> {
+    // This method is not applicable for OAuth
+    return throwError(() => new Error('Password change not available with OAuth authentication.'));
+  }
+
+  /**
+   * Check if dialog has been shown (for backward compatibility)
+   */
+  hasDialogBeenShown(): boolean {
+    // This method is not applicable for OAuth
+    return false;
+  }
+
+  /**
+   * Show dialog (for backward compatibility)
+   */
+  showDialog(): void {
+    // This method is not applicable for OAuth
+    // No-op for OAuth authentication
+  }
+
+  private discover(issuer: string): Observable<void> {
+    const discoveryUrl = `${issuer}/.well-known/openid-configuration`;
+    return this.http
+      .disableApiPrefix()
+      .get(discoveryUrl)
+      .pipe(
+        map((doc: any) => {
+          this.authorizationEndpoint = doc.authorization_endpoint;
+          this.tokenEndpoint = doc.token_endpoint;
+          this.userinfoEndpoint = doc.userinfo_endpoint;
+          this.endSessionEndpoint = doc.end_session_endpoint;
+
+          // Store endpoints in storage for later use
+          if (this.tokenEndpoint) {
+            this.storage.setItem('token_endpoint', this.tokenEndpoint);
+          }
+          if (this.userinfoEndpoint) {
+            this.storage.setItem('userinfo_endpoint', this.userinfoEndpoint);
+          }
+          if (this.endSessionEndpoint) {
+            this.storage.setItem('end_session_endpoint', this.endSessionEndpoint);
+          }
+        }),
+        catchError((err) => {
+          this.alertService.alert({
+            type: 'Discovery Error',
+            message: 'Failed to discover OAuth2 endpoints. Please check your issuer URL.'
+          });
+          return throwError(() => err);
+        })
+      );
+  }
+
+  private startPkceLogin(issuer: string, clientId: string, redirectUri: string, scope: string): Observable<void> {
+    const authorize = this.authorizationEndpoint;
+    if (!authorize) {
+      return throwError(() => new Error('Authorization endpoint not available. Did discovery run?'));
+    }
+
+    const state = crypto.randomUUID();
+    this.storage.setItem('oauth_state', state);
+
+    return this.createCodeChallenge().pipe(
+      map(({ codeVerifier, codeChallenge }) => {
+        this.storage.setItem('pkce_verifier', codeVerifier);
+
+        const url = new URL(authorize);
+        url.searchParams.set('response_type', 'code');
+        url.searchParams.set('client_id', clientId);
+        url.searchParams.set('redirect_uri', redirectUri);
+        url.searchParams.set('scope', scope);
+        url.searchParams.set('state', state);
+        url.searchParams.set('code_challenge_method', 'S256');
+        url.searchParams.set('code_challenge', codeChallenge);
+
+        window.location.assign(url.toString());
       })
     );
   }
 
-  /*
-   * Get user logged in
+  private createCodeChallenge(): Observable<{ codeVerifier: string; codeChallenge: string }> {
+    const verifierBytes = new Uint8Array(32);
+    crypto.getRandomValues(verifierBytes);
+    const codeVerifier = this.base64url(verifierBytes);
+
+    return new Observable((observer) => {
+      crypto.subtle
+        .digest('SHA-256', new TextEncoder().encode(codeVerifier))
+        .then((digest) => {
+          const codeChallenge = this.base64url(new Uint8Array(digest));
+          observer.next({ codeVerifier, codeChallenge });
+          observer.complete();
+        })
+        .catch((err) => observer.error(err));
+    });
+  }
+
+  private base64url(bytes: Uint8Array): string {
+    let s = '';
+    for (let i = 0; i < bytes.length; i++) {
+      s += String.fromCharCode(bytes[i]);
+    }
+    return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+  }
+
+  private persistTokens(tokens: OAuth2Token): void {
+    if (tokens.access_token) {
+      this.storage.setItem('access_token', tokens.access_token);
+    }
+    if (tokens.id_token) {
+      this.storage.setItem('id_token', tokens.id_token);
+    }
+    if (tokens.refresh_token) {
+      this.storage.setItem('refresh_token', tokens.refresh_token);
+    }
+    if (tokens.expires_in) {
+      const expiresAt = (Date.now() + tokens.expires_in * 1000).toString();
+      this.storage.setItem('expires_at', expiresAt);
+    }
+  }
+
+  private clearTokens(): void {
+    this.storage.removeItem('access_token');
+    this.storage.removeItem('id_token');
+    this.storage.removeItem('refresh_token');
+    this.storage.removeItem('expires_at');
+    this.storage.removeItem('pkce_verifier');
+    this.storage.removeItem('oauth_state');
+    this.storage.removeItem('token_endpoint');
+    this.storage.removeItem('userinfo_endpoint');
+    this.storage.removeItem('end_session_endpoint');
+  }
+
+  private clearAuthQueryParams(): void {
+    const url = new URL(window.location.href);
+    url.searchParams.delete('code');
+    url.searchParams.delete('state');
+    window.history.replaceState({}, document.title, url.toString());
+  }
+
+  private requireIssuer(): string {
+    const issuer = environment.oauth.issuerUrl;
+    if (!issuer) {
+      throw new Error('Missing environment.oauth.issuer (should be the provider URL with slug).');
+    }
+    return issuer.replace(/\/+$/, '');
+  }
+
+  private getUserDetails(tokens: OAuth2Token): Observable<any> {
+    const userinfo = this.storage.getItem('userinfo_endpoint') || this.userinfoEndpoint;
+    if (!userinfo || !tokens?.access_token) {
+      this.onLoginSuccess({ accessToken: tokens.access_token });
+      return of(null);
+    }
+
+    const headers = new HttpHeaders({ Authorization: `Bearer ${tokens.access_token}` });
+    return this.http
+      .disableApiPrefix()
+      .get(userinfo, { headers })
+      .pipe(
+        map((profile: OAuth2UserProfile) => {
+          const credentials: OAuth2Credentials = {
+            accessToken: tokens.access_token,
+            idToken: tokens.id_token,
+            refreshToken: tokens.refresh_token,
+            user: {
+              sub: profile.sub,
+              username: profile.preferred_username || profile.sub,
+              name: profile.name || profile.preferred_username || profile.sub,
+              email: profile.email
+            },
+            groups: profile.groups,
+            permissions: profile.permissions,
+            remember: this.rememberMe
+          };
+          this.onLoginSuccess(credentials);
+          return credentials;
+        }),
+        catchError((err) => {
+          // If userinfo fails, still proceed with login using available token data
+          this.alertService.alert({
+            type: 'Warning',
+            message: 'Could not fetch user profile, proceeding with available information.'
+          });
+          const credentials: OAuth2Credentials = {
+            accessToken: tokens.access_token,
+            idToken: tokens.id_token,
+            refreshToken: tokens.refresh_token,
+            user: {
+              sub: 'unknown',
+              username: 'unknown',
+              name: 'Unknown User',
+              email: undefined
+            },
+            groups: [],
+            permissions: [],
+            remember: this.rememberMe
+          };
+          this.onLoginSuccess(credentials);
+          return of(credentials);
+        })
+      );
+  }
+
+  private onLoginSuccess(credentials: any): void {
+    this.userLoggedIn = true;
+
+    // Store the authentication token
+    if (credentials.accessToken) {
+      if (environment.oauth.enabled) {
+        tokenService.setToken(credentials.accessToken, 'Bearer');
+      } else {
+        // For legacy Basic auth, the token should be base64 encoded username:password
+        tokenService.setToken(credentials.base64EncodedAuthenticationKey || credentials.accessToken, 'Basic');
+      }
+    }
+
+    this.storage.setItem('user_info', JSON.stringify(credentials));
+
+    this.alertService.alert({ type: 'Authentication Success', message: 'Signed in successfully.' });
+  }
+
+  /**
+   * Exchanges a refresh_token for new tokens
    */
-  getUserLoggedIn(): boolean {
-    return this.userLoggedIn;
+  refreshTokens(): Observable<OAuth2Token> {
+    const tokenEndpoint = this.storage.getItem('token_endpoint') || this.tokenEndpoint;
+    const refresh = this.storage.getItem('refresh_token');
+    const clientId = environment.oauth.clientId;
+
+    if (!tokenEndpoint || !refresh || !clientId) {
+      return throwError(() => new Error('Refresh not possible: missing endpoint, token, or client_id.'));
+    }
+
+    const body = new HttpParams()
+      .set('grant_type', 'refresh_token')
+      .set('refresh_token', refresh)
+      .set('client_id', clientId);
+
+    const headers = new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' });
+
+    return this.http
+      .disableApiPrefix()
+      .post(tokenEndpoint, body.toString(), { headers })
+      .pipe(
+        map((tokens: OAuth2Token) => {
+          this.persistTokens(tokens);
+          return tokens;
+        }),
+        catchError((err) => {
+          // If refresh fails, clear tokens and redirect to login
+          this.clearTokens();
+          this.userLoggedIn = false;
+          this.alertService.alert({
+            type: 'Authentication Error',
+            message: 'Session expired. Please log in again.'
+          });
+          return throwError(() => err);
+        })
+      );
   }
 }

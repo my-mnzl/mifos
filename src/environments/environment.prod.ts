@@ -25,15 +25,19 @@ export const environment = {
   apiVersion: loadedEnv['apiVersion'] || '/v1',
   serverUrl: '',
   oauth: {
-    enabled: loadedEnv['oauthServerEnabled'] || false, // For connecting to Mifos X using OAuth2 Authentication change the value to true
-    serverUrl: loadedEnv['oauthServerUrl'] || '',
-    appId: loadedEnv['oauthAppId'] || ''
+    enabled: loadedEnv.oauthServerEnabled || false,
+    providerName: loadedEnv.oauthProviderName || '',
+    issuerUrl: loadedEnv.oauthIssuerUrl || '',
+    clientId: loadedEnv.oauthClientId || '',
+    redirectUri: loadedEnv.oauthRedirectUri || '',
+    scope: loadedEnv.oauthScope || '',
+    postLogoutRedirectUri: loadedEnv.oauthPostLogoutRedirectUri || ''
   },
   warningDialog: {
-    title: 'Warning',
+    title: 'Notice',
     content:
       'This system is for authorized use only. Unauthorized access will result in possible legal action. By accessing this system, you acknowledge that you are authorized to do so and that all data stored and processed here is confidential.',
-    buttonText: 'Close'
+    buttonText: 'Acknowledge'
   },
   defaultLanguage: loadedEnv['defaultLanguage'] || 'en-US',
   supportedLanguages:

@@ -8,6 +8,7 @@ import { Observable } from 'rxjs';
 /** Custom Imports */
 import { environment } from '../../../environments/environment';
 import { SettingsService } from 'app/settings/settings.service';
+import { tokenService } from './authentication.service';
 
 /** Http request (default) options headers. */
 const httpOptions: { headers: { [key: string]: string } } = {
@@ -33,22 +34,33 @@ export class AuthenticationInterceptor implements HttpInterceptor {
    * Intercepts a Http request and sets the request headers.
    */
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    let headers: { [key: string]: string } = { ...httpOptions.headers };
+
+    // Set tenant identifier
     if (this.settingsService.tenantIdentifier) {
-      httpOptions.headers['Fineract-Platform-TenantId'] = this.settingsService.tenantIdentifier;
+      headers['Fineract-Platform-TenantId'] = this.settingsService.tenantIdentifier;
     }
-    request = request.clone({ setHeaders: httpOptions.headers });
+
+    // Set authorization header if token is available
+    const authHeader = tokenService.getAuthorizationHeader();
+    if (authHeader) {
+      headers[authorizationHeader] = authHeader;
+    }
+
+    request = request.clone({ setHeaders: headers });
     return next.handle(request);
   }
 
   /**
    * Sets the basic/oauth authorization header depending on the configuration.
    * @param {string} authenticationKey Authentication key.
+   * @deprecated Use tokenService.setToken() instead
    */
   setAuthorizationToken(authenticationKey: string) {
     if (environment.oauth.enabled) {
-      httpOptions.headers[authorizationHeader] = `Bearer ${authenticationKey}`;
+      tokenService.setToken(authenticationKey, 'Bearer');
     } else {
-      httpOptions.headers[authorizationHeader] = `Basic ${authenticationKey}`;
+      tokenService.setToken(authenticationKey, 'Basic');
     }
   }
 
@@ -62,16 +74,18 @@ export class AuthenticationInterceptor implements HttpInterceptor {
 
   /**
    * Removes the authorization header.
+   * @deprecated Use tokenService.clearToken() instead
    */
   removeAuthorization() {
-    delete httpOptions.headers[authorizationHeader];
+    tokenService.clearToken();
   }
 
   /**
    * Removes the authorization header.
+   * @deprecated Use tokenService.clearToken() instead
    */
   removeAuthorizationTenant() {
-    delete httpOptions.headers[authorizationHeader];
+    tokenService.clearToken();
     delete httpOptions.headers[authorizationTenantHeader];
   }
 

@@ -15,6 +15,9 @@ import { MatProgressBar } from '@angular/material/progress-bar';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { STANDALONE_SHARED_IMPORTS } from 'app/standalone-shared.module';
 
+/** Environment */
+import { environment } from '../../../environments/environment';
+
 /**
  * Login form component.
  */
@@ -22,14 +25,20 @@ import { STANDALONE_SHARED_IMPORTS } from 'app/standalone-shared.module';
   selector: 'mifosx-login-form',
   templateUrl: './login-form.component.html',
   styleUrls: ['./login-form.component.scss'],
+  standalone: true,
   imports: [
     ...STANDALONE_SHARED_IMPORTS,
     MatPrefix,
+    MatLabel,
+    MatError,
+    MatSuffix,
     FaIconComponent,
     MatIconButton,
+    MatButton,
     MatCheckbox,
     MatProgressBar,
-    MatProgressSpinner
+    MatProgressSpinner,
+    ReactiveFormsModule
   ]
 })
 export class LoginFormComponent implements OnInit {
@@ -39,6 +48,8 @@ export class LoginFormComponent implements OnInit {
   passwordInputType: string = 'password';
   /** True if loading. */
   loading = false;
+  /** Environment configuration. */
+  environment = environment;
 
   /**
    * @param {FormBuilder} formBuilder Form Builder.
@@ -93,6 +104,21 @@ export class LoginFormComponent implements OnInit {
    */
   forgotPassword() {
     console.log('Forgot Password feature currently unavailable.');
+  }
+
+  /**
+   * Initiates OAuth authentication flow.
+   */
+  oauthLogin() {
+    this.loading = true;
+    this.authenticationService
+      .login({ remember: true })
+      .pipe(
+        finalize(() => {
+          this.loading = false;
+        })
+      )
+      .subscribe();
   }
 
   /**

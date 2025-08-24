@@ -1,12 +1,6 @@
 /** Angular Imports */
 import { NgModule, Optional, SkipSelf, Injector } from '@angular/core';
-import {
-  HTTP_INTERCEPTORS,
-  HttpClient,
-  HttpHandler,
-  provideHttpClient,
-  withInterceptorsFromDi
-} from '@angular/common/http';
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { RouteReuseStrategy, RouterModule } from '@angular/router';
 
 /** Translation Imports */
@@ -62,15 +56,23 @@ import { ContentComponent } from './shell/content/content.component';
     ContentComponent
   ],
   providers: [
+    ApiPrefixInterceptor,
+    ErrorHandlerInterceptor,
+    HttpService,
     AuthenticationService,
     AuthenticationGuard,
     AuthenticationInterceptor,
+    HttpCacheService,
+    ProgressBarService,
+    {
+      provide: RouteReuseStrategy,
+      useClass: RouteReusableStrategy
+    },
     {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthenticationInterceptor,
       multi: true
     },
-    HttpCacheService,
     {
       provide: HTTP_INTERCEPTORS,
       useClass: ApiPrefixInterceptor,
@@ -87,28 +89,10 @@ import { ContentComponent } from './shell/content/content.component';
       multi: true
     },
     {
-      provide: HttpClient,
-      useClass: HttpService,
-      deps: [
-        HttpHandler,
-        Injector,
-        [
-          new Optional(),
-          HTTP_DYNAMIC_INTERCEPTORS
-        ]
-      ]
-    },
-    ProgressBarService,
-    {
       provide: HTTP_INTERCEPTORS,
       useClass: ProgressInterceptor,
       multi: true
-    },
-    {
-      provide: RouteReuseStrategy,
-      useClass: RouteReusableStrategy
-    },
-    provideHttpClient(withInterceptorsFromDi())
+    }
   ]
 })
 export class CoreModule {
