@@ -43,6 +43,9 @@ FROM $NGINX_IMAGE
 
 COPY --from=builder /dist/browser /usr/share/nginx/html
 
+# Replace the default index directive with try_files in nginx config
+RUN sed -i 's/index  index.html index.htm;/try_files $uri \/index.html;/' /etc/nginx/conf.d/default.conf
+
 EXPOSE 80
 
 # When the container starts, replace the env.js with values from environment variables
