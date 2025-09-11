@@ -1,25 +1,24 @@
 /** Angular Imports */
 import { Component, OnInit } from '@angular/core';
 import {
-  UntypedFormGroup,
   UntypedFormBuilder,
   UntypedFormControl,
-  Validators,
-  ReactiveFormsModule
+  UntypedFormGroup,
+  Validators
 } from '@angular/forms';
-import { Router, ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 /** Custom Services */
-import { ProductsService } from '../../products.service';
-import { SettingsService } from 'app/settings/settings.service';
-import { Dates } from 'app/core/utils/dates';
-import { minNumberValueValidator } from 'app/shared/validators/min-number-value.validator';
-import { maxNumberValueValidator } from 'app/shared/validators/max-number-value.validator';
-import { MatDivider } from '@angular/material/divider';
 import { MatCheckbox } from '@angular/material/checkbox';
+import { MatDivider } from '@angular/material/divider';
+import { Dates } from 'app/core/utils/dates';
+import { SettingsService } from 'app/settings/settings.service';
+import { maxNumberValueValidator } from 'app/shared/validators/max-number-value.validator';
+import { minNumberValueValidator } from 'app/shared/validators/min-number-value.validator';
+import { STANDALONE_SHARED_IMPORTS } from 'app/standalone-shared.module';
 import { ValidateOnFocusDirective } from '../../../directives/validate-on-focus.directive';
 import { GlAccountSelectorComponent } from '../../../shared/accounting/gl-account-selector/gl-account-selector.component';
-import { STANDALONE_SHARED_IMPORTS } from 'app/standalone-shared.module';
+import { ProductsService } from '../../products.service';
 
 /**
  * Create charge component.
@@ -206,7 +205,8 @@ export class CreateChargeComponent implements OnInit {
         chargeCalculationType === 2 ||
         chargeCalculationType === 3 ||
         chargeCalculationType === 4 ||
-        chargeCalculationType === 5
+        chargeCalculationType === 5 ||
+        chargeCalculationType === 6
       );
     } else if (chargeAppliesTo === 2) {
       return (chargeTimeType === 16 || chargeTimeType === 5) && chargeCalculationType === 2;
