@@ -1,4 +1,4 @@
-<div class="container" *ngIf="chargeForm">
+<div class="container">
   <mat-card>
     <form [formGroup]="chargeForm" (ngSubmit)="submit()">
       <mat-card-content>
@@ -6,10 +6,8 @@
           <mat-form-field class="flex-48">
             <mat-label>{{ 'labels.inputs.Charge Applies To' | translate }}</mat-label>
             <mat-select required formControlName="chargeAppliesTo">
-              <mat-option
-                *ngFor="let chargeAppliesTo of chargeData?.chargeAppliesToOptions"
-                [value]="chargeAppliesTo.id"
-              >
+              <mat-option *ngFor="let chargeAppliesTo of chargeData.chargeAppliesToOptions"
+                [value]="chargeAppliesTo.id">
                 {{ chargeAppliesTo.value | translateKey: 'catalogs' }}
               </mat-option>
             </mat-select>
@@ -20,7 +18,7 @@
           <mat-form-field class="flex-48">
             <mat-label>{{ 'labels.inputs.Name' | translate }}</mat-label>
             <input matInput required autofocus formControlName="name" />
-            <mat-error *ngIf="chargeForm?.controls?.name?.hasError('required')">
+            <mat-error *ngIf="chargeForm.controls.name.hasError('required')">
               {{ 'labels.inputs.Name' | translate }} {{ 'labels.commons.is' | translate }}
               <strong>{{ 'labels.commons.required' | translate }}</strong>
             </mat-error>
@@ -68,10 +66,8 @@
           <mat-form-field class="flex-48" *ngIf="chargePaymentMode">
             <mat-label>{{ 'labels.inputs.Charge Payment By' | translate }}</mat-label>
             <mat-select required formControlName="chargePaymentMode">
-              <mat-option
-                *ngFor="let chargePaymentMode of chargeData.chargePaymetModeOptions"
-                [value]="chargePaymentMode.id"
-              >
+              <mat-option *ngFor="let chargePaymentMode of chargeData.chargePaymetModeOptions"
+                [value]="chargePaymentMode.id">
                 {{ chargePaymentMode.value | translateKey: 'catalogs' }}
               </mat-option>
             </mat-select>
@@ -95,64 +91,56 @@
    * In saving case: Only for 1. charge time type is "withdrawlfee" or "savings no activity fee" with charge calculation type as "% amount"
    * In shares case: Only for charge time type: SHARE_PURCHASE and SHARE_REDEEM and with charge calculation type as % amount only
   -->
-          <mat-form-field
-            class="flex-48"
-            *ngIf="
+          <mat-form-field class="flex-48" *ngIf="
               (chargeForm.controls.chargeAppliesTo.value === 1 &&
                 (chargeForm.controls.chargeCalculationType.value === 2 ||
                   chargeForm.controls.chargeCalculationType.value === 3 ||
                   chargeForm.controls.chargeCalculationType.value === 4 ||
-                  chargeForm.controls.chargeCalculationType.value === 5)) ||
+                  chargeForm.controls.chargeCalculationType.value === 5 ||
+                  chargeForm.controls.chargeCalculationType.value === 6)) ||
               (chargeForm.controls.chargeAppliesTo.value === 2 &&
                 (chargeForm.controls.chargeTimeType.value === 16 || chargeForm.controls.chargeTimeType.value === 5) &&
                 chargeForm.controls.chargeCalculationType.value === 2) ||
               (chargeForm.controls.chargeAppliesTo.value === 4 &&
                 (chargeForm.controls.chargeTimeType.value === 14 || chargeForm.controls.chargeTimeType.value === 15) &&
                 chargeForm.controls.chargeCalculationType.value === 2)
-            "
-          >
+            ">
             <mat-label>{{ 'labels.inputs.Minimum Charge Cap' | translate }}</mat-label>
             <input matInput autofocus formControlName="minCap" mifosxValidateOnFocus />
             <mat-error *ngIf="chargeForm.controls.minCap.hasError('maxValue')">
               {{ 'errors.validation.msg.loanproduct.minimumGap.not.greater.than.specified.number' | translate }} ({{
-                chargeForm.controls.maxCap.value
+              chargeForm.controls.maxCap.value
               }})
             </mat-error>
           </mat-form-field>
-          <mat-form-field
-            class="flex-48"
-            *ngIf="
+          <mat-form-field class="flex-48" *ngIf="
               (chargeForm.controls.chargeAppliesTo.value === 1 &&
                 (chargeForm.controls.chargeCalculationType.value === 2 ||
                   chargeForm.controls.chargeCalculationType.value === 3 ||
                   chargeForm.controls.chargeCalculationType.value === 4 ||
-                  chargeForm.controls.chargeCalculationType.value === 5)) ||
+                  chargeForm.controls.chargeCalculationType.value === 5 ||
+                  chargeForm.controls.chargeCalculationType.value === 6)) ||
               (chargeForm.controls.chargeAppliesTo.value === 2 &&
                 (chargeForm.controls.chargeTimeType.value === 16 || chargeForm.controls.chargeTimeType.value === 5) &&
                 chargeForm.controls.chargeCalculationType.value === 2) ||
               (chargeForm.controls.chargeAppliesTo.value === 4 &&
                 (chargeForm.controls.chargeTimeType.value === 14 || chargeForm.controls.chargeTimeType.value === 15) &&
                 chargeForm.controls.chargeCalculationType.value === 2)
-            "
-          >
+            ">
             <mat-label>{{ 'labels.inputs.Maximum Charge Cap' | translate }}</mat-label>
             <input matInput autofocus formControlName="maxCap" mifosxValidateOnFocus />
 
             <mat-error *ngIf="chargeForm.controls.maxCap.hasError('minValue')">
               {{ 'errors.validation.msg.loanproduct.maximumGap.not.greater.than.specified.number' | translate }} ({{
-                chargeForm.controls.minCap.value
+              chargeForm.controls.minCap.value
               }})
             </mat-error>
           </mat-form-field>
 
-          <mifosx-gl-account-selector
-            class="flex-48"
-            *ngIf="showGLAccount"
+          <mifosx-gl-account-selector class="flex-48" *ngIf="showGLAccount"
             [inputFormControl]="chargeForm.controls.incomeAccountId"
-            [glAccountList]="chargeData.incomeOrLiabilityAccountOptions.incomeAccountOptions"
-            [required]="true"
-            [inputLabel]="'Income from Charge'"
-          >
+            [glAccountList]="chargeData.incomeOrLiabilityAccountOptions.incomeAccountOptions" [required]="true"
+            [inputLabel]="'Income from Charge'">
           </mifosx-gl-account-selector>
 
           <mat-form-field class="flex-48">
@@ -171,11 +159,8 @@
           </mat-form-field>
 
           <div class="password-never-expires-wrapper checkbox flex-48" *ngIf="addFeeFrequency">
-            <mat-checkbox
-              labelPosition="before"
-              [checked]="addFeeFrequency && showFeeOptions"
-              (change)="getFeeFrequency($event.checked)"
-            >
+            <mat-checkbox labelPosition="before" [checked]="addFeeFrequency && showFeeOptions"
+              (change)="getFeeFrequency($event.checked)">
               {{ 'labels.inputs.Add Fee Frequency' | translate }}
             </mat-checkbox>
           </div>
