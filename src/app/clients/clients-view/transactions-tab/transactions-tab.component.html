@@ -61,37 +61,67 @@
       </ng-container>
 
       <ng-container matColumnDef="amount">
-        <td mat-cell class="r-amount td-min-space" *matCellDef="let transaction" [ngClass]="loanTransactionColor(transaction)">
+        <td
+          mat-cell
+          class="r-amount td-min-space"
+          *matCellDef="let transaction"
+          [ngClass]="loanTransactionColor(transaction)"
+        >
           {{ transaction.amount | formatNumber }}
         </td>
       </ng-container>
 
       <ng-container matColumnDef="principal">
-        <td mat-cell class="r-amount td-min-space" *matCellDef="let transaction" [ngClass]="loanTransactionColor(transaction)">
+        <td
+          mat-cell
+          class="r-amount td-min-space"
+          *matCellDef="let transaction"
+          [ngClass]="loanTransactionColor(transaction)"
+        >
           {{ transaction.principalPortion | formatNumber }}
         </td>
       </ng-container>
 
       <ng-container matColumnDef="interest">
-        <td mat-cell class="r-amount td-min-space" *matCellDef="let transaction" [ngClass]="loanTransactionColor(transaction)">
+        <td
+          mat-cell
+          class="r-amount td-min-space"
+          *matCellDef="let transaction"
+          [ngClass]="loanTransactionColor(transaction)"
+        >
           {{ transaction.interestPortion | formatNumber }}
         </td>
       </ng-container>
 
       <ng-container matColumnDef="fee">
-        <td mat-cell class="r-amount td-min-space" *matCellDef="let transaction" [ngClass]="loanTransactionColor(transaction)">
+        <td
+          mat-cell
+          class="r-amount td-min-space"
+          *matCellDef="let transaction"
+          [ngClass]="loanTransactionColor(transaction)"
+        >
           {{ transaction.feeChargesPortion | formatNumber }}
         </td>
       </ng-container>
 
       <ng-container matColumnDef="penalties">
-        <td mat-cell class="r-amount td-min-space" *matCellDef="let transaction" [ngClass]="loanTransactionColor(transaction)">
+        <td
+          mat-cell
+          class="r-amount td-min-space"
+          *matCellDef="let transaction"
+          [ngClass]="loanTransactionColor(transaction)"
+        >
           {{ transaction.penaltyChargesPortion | formatNumber }}
         </td>
       </ng-container>
 
       <ng-container matColumnDef="loanBalance">
-        <td mat-cell class="r-amount td-min-space" *matCellDef="let transaction" [ngClass]="loanTransactionColor(transaction)">
+        <td
+          mat-cell
+          class="r-amount td-min-space"
+          *matCellDef="let transaction"
+          [ngClass]="loanTransactionColor(transaction)"
+        >
           {{ transaction.outstandingLoanBalance | formatNumber }}
         </td>
       </ng-container>
@@ -100,7 +130,12 @@
         <td mat-cell *matCellDef="let transaction" class="center">
           @if (canShowDetails(transaction)) {
             @if (displaySubMenu(transaction)) {
-              <button mat-icon-button [matMenuTriggerFor]="transactionMenu" aria-label="Transaction actions" class="action-button">
+              <button
+                mat-icon-button
+                [matMenuTriggerFor]="transactionMenu"
+                aria-label="Transaction actions"
+                class="action-button"
+              >
                 <mat-icon>more_vert</mat-icon>
               </button>
               <mat-menu #transactionMenu="matMenu">

@@ -420,11 +420,12 @@ export class AuthenticationService {
     const claims = await this.getExternalOAuthClaims();
     const groups = this.toStringArray(claims['groups']);
     const roles = this.toRoleObjects(this.toStringArray(claims['roles']), groups);
-    const username = this.readClaim(claims, [
-      'preferred_username',
-      'username',
-      'sub'
-    ]) || 'oauth-user';
+    const username =
+      this.readClaim(claims, [
+        'preferred_username',
+        'username',
+        'sub'
+      ]) || 'oauth-user';
 
     const credentials: Credentials = {
       accessToken,

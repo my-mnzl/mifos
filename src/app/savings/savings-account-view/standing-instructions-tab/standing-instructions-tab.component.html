@@ -50,15 +50,15 @@
           @if (instruction.status.value !== 'Deleted') {
             <span>
               <button
-              class="account-action-button"
-              mat-raised-button
-              color="primary"
-              matTooltip="{{ 'tooltips.Edit Standing Instruction' | translate }}"
-              *mifosxHasPermission="'UPDATE_STANDINGINSTRUCTION'"
-              [routerLink]="['../../..', 'standing-instructions', instruction.id, 'edit']"
-            >
-              <i class="fa fa-edit"></i>
-            </button>
+                class="account-action-button"
+                mat-raised-button
+                color="primary"
+                matTooltip="{{ 'tooltips.Edit Standing Instruction' | translate }}"
+                *mifosxHasPermission="'UPDATE_STANDINGINSTRUCTION'"
+                [routerLink]="['../../..', 'standing-instructions', instruction.id, 'edit']"
+              >
+                <i class="fa fa-edit"></i>
+              </button>
             </span>
           }
           @if (instruction.status.value !== 'Deleted') {

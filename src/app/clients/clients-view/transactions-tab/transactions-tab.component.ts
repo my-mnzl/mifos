@@ -221,7 +221,7 @@ export class ClientTransactionsTabComponent implements OnInit {
     if (transaction.type.chargeRefund) {
       return 'charge-refund';
     }
-    if (transaction.type.chargeWaiver) {
+    if (transaction.type.waiveCharges) {
       return 'charge-waiver';
     }
     return '';
