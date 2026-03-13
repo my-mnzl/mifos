@@ -32,6 +32,15 @@
           <b>{{ businessDate | date: 'EEEE, MMMM dd, y' }}</b>
         </td>
       </tr>
+      <tr *ngIf="!isBusinessDateDefined">
+        <td class="footer-content">{{ 'labels.text.Cached Business Date' | translate }}:</td>
+        <td class="right footer-content business-date">
+          <b>
+            <fa-icon icon="refresh" size="sm" (click)="setCachedBusinessDate()"></fa-icon>
+            {{ cachedBusinessDate | date: 'EEEE, MMMM dd, y' }}
+          </b>
+        </td>
+      </tr>
     </table>
   </div>
 

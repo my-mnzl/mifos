@@ -48,6 +48,11 @@
 
         <br />
 
+        <div *ngIf="hasPastDatePeriods()" class="warning-message">
+          <mat-icon>warning</mat-icon>
+          <span><em>Note: past periods cannot be modified. Only future periods will be saved.</em></span>
+        </div>
+
         <div class="layout-row-wrap gap-70percent m-b-10 layout-lt-md-column">
           <p class="mat-title flex-25">
             {{ 'labels.inputs.Floating Rate Periods' | translate }}
@@ -127,18 +132,30 @@
                 type="button"
                 color="primary"
                 mat-icon-button
+                [disabled]="isPastDate(floatingRatePeriod)"
                 (click)="editFloatingRatePeriod(floatingRatePeriod)"
               >
                 <fa-icon icon="edit" size="lg"></fa-icon>
               </button>
-              <button type="button" color="warn" mat-icon-button (click)="deleteFloatingRatePeriod(floatingRatePeriod)">
+              <button
+                type="button"
+                color="warn"
+                mat-icon-button
+                [disabled]="isPastDate(floatingRatePeriod)"
+                (click)="deleteFloatingRatePeriod(floatingRatePeriod)"
+              >
                 <fa-icon icon="trash" size="lg"></fa-icon>
               </button>
             </td>
           </ng-container>
 
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+          <tr
+            mat-row
+            *matRowDef="let row; columns: displayedColumns"
+            [class.past-date-row]="isPastDate(row)"
+            [matTooltip]="isPastDate(row) ? 'This period cannot be modified' : ''"
+          ></tr>
         </table>
 
         <mat-paginator [pageSizeOptions]="[10, 25, 50, 100]" showFirstLastButtons></mat-paginator>

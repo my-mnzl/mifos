@@ -32,6 +32,7 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatDivider } from '@angular/material/divider';
 import { MatMiniFabButton, MatIconButton, MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { DateFormatPipe } from '../../../pipes/date-format.pipe';
 import { STANDALONE_SHARED_IMPORTS } from 'app/standalone-shared.module';
@@ -48,6 +49,7 @@ import { STANDALONE_SHARED_IMPORTS } from 'app/standalone-shared.module';
     MatTooltip,
     MatCheckbox,
     MatDivider,
+    MatIcon,
     MatMiniFabButton,
     FaIconComponent,
     MatTable,
@@ -153,6 +155,17 @@ export class EditFloatingRateComponent implements OnInit {
     this.dataSource.sort = this.sort;
   }
 
+  isPastDate(ratePeriod: any): boolean {
+    const currentBusinessDate = this.settingsService.businessDate;
+    const periodDate = this.dateUtils.convertToDate(ratePeriod.fromDate, this.dateFormat);
+
+    return !!currentBusinessDate && periodDate < currentBusinessDate;
+  }
+
+  hasPastDatePeriods(): boolean {
+    return this.floatingRatePeriodsData.some((period: any) => this.isPastDate(period));
+  }
+
   /**
    * Adds a new floating rate period.
    */
@@ -229,7 +242,9 @@ export class EditFloatingRateComponent implements OnInit {
    * if successful redirects to view created floating rate.
    */
   submit() {
-    this.floatingRatePeriodsData.map((floatingRatePeriod) => {
+    const filteredPeriods = this.floatingRatePeriodsData.filter((period: any) => !this.isPastDate(period));
+
+    filteredPeriods.map((floatingRatePeriod) => {
       floatingRatePeriod.modifiedOn = undefined;
       floatingRatePeriod.createdOn = undefined;
       floatingRatePeriod.id = undefined;
@@ -240,8 +255,7 @@ export class EditFloatingRateComponent implements OnInit {
       floatingRatePeriod.dateFormat = this.dateFormat;
       floatingRatePeriod.fromDate = this.dateUtils.formatDate(floatingRatePeriod.fromDate, this.dateFormat);
     });
-    this.floatingRateForm.value.ratePeriods =
-      this.floatingRatePeriodsData.length > 0 ? this.floatingRatePeriodsData : undefined;
+    this.floatingRateForm.value.ratePeriods = filteredPeriods.length > 0 ? filteredPeriods : undefined;
     this.productsService
       .updateFloatingRate(this.route.snapshot.paramMap.get('id'), this.floatingRateForm.value)
       .subscribe((response: any) => {

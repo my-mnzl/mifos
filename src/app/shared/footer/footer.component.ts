@@ -13,6 +13,7 @@ import { environment } from '../../../environments/environment';
 import { Subscription } from 'rxjs';
 import { NgClass, DatePipe } from '@angular/common';
 import { MatDivider } from '@angular/material/divider';
+import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { STANDALONE_SHARED_IMPORTS } from 'app/standalone-shared.module';
 
 /**
@@ -26,7 +27,8 @@ import { STANDALONE_SHARED_IMPORTS } from 'app/standalone-shared.module';
     ...STANDALONE_SHARED_IMPORTS,
     NgClass,
     MatDivider,
-    DatePipe
+    DatePipe,
+    FaIconComponent
   ]
 })
 export class FooterComponent implements OnInit, OnDestroy {
@@ -139,12 +141,30 @@ export class FooterComponent implements OnInit, OnDestroy {
    * Get the Business Date data
    */
   setBusinessDate(): void {
-    this.systemService.getBusinessDate(SettingsService.businessDateType).subscribe((data: any) => {
-      this.businessDate = new Date(data.date);
-      this.settingsService.setBusinessDate(
-        this.dateUtils.formatDate(this.businessDate, SettingsService.businessDateFormat)
-      );
-      this.isBusinessDateDefined = true;
+    this.systemService.getBusinessDate(SettingsService.businessDateType).subscribe({
+      next: (data: any) => {
+        this.businessDate = new Date(data.date);
+        this.settingsService.setBusinessDate(
+          this.dateUtils.formatDate(this.businessDate, SettingsService.businessDateFormat)
+        );
+        this.isBusinessDateDefined = true;
+      },
+      error: () => {
+        this.isBusinessDateDefined = false;
+      }
     });
+  }
+
+  get cachedBusinessDate(): Date {
+    return this.settingsService.businessDate;
+  }
+
+  setCachedBusinessDate(): void {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = `${now.getMonth() + 1}`.padStart(2, '0');
+    const day = `${now.getDate()}`.padStart(2, '0');
+
+    this.settingsService.setBusinessDate(`${year}-${month}-${day}`);
   }
 }

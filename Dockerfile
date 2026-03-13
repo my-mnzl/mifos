@@ -42,6 +42,7 @@ RUN sh -c "ng build --output-path=/dist $BUILD_ENVIRONMENT_OPTIONS"
 FROM $NGINX_IMAGE
 
 COPY --from=builder /dist/browser /usr/share/nginx/html
+RUN sed -i 's/index  index.html index.htm;/try_files $uri \/index.html;/' /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
 
