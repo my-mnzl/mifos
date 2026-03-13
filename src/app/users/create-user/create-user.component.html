@@ -99,16 +99,29 @@
                   <strong>{{ 'labels.commons.50 characters long' | translate }}</strong>
                 </mat-error>
               }
-              @if (
-                userForm.controls.password.hasError('pattern') &&
-                !(userForm.controls.password.hasError('minlength') || userForm.controls.password.hasError('maxlength'))
-              ) {
+              @if (userForm.controls.password.hasError('uppercase')) {
                 <mat-error>
-                  {{ 'labels.commons.Password should include a' | translate }}
-                  <strong>{{ 'labels.commons.numeral' | translate }}</strong> {{ 'labels.commons.and at' | translate }}
-                  <strong>{{ 'labels.commons.least one uppercase' | translate }}</strong> ,<strong>{{
-                    'labels.commons.lowercase and special character' | translate
-                  }}</strong>
+                  {{ 'labels.commons.Password must contain at least one uppercase letter' | translate }}
+                </mat-error>
+              }
+              @if (userForm.controls.password.hasError('lowercase')) {
+                <mat-error>
+                  {{ 'labels.commons.Password must contain at least one lowercase letter' | translate }}
+                </mat-error>
+              }
+              @if (userForm.controls.password.hasError('number')) {
+                <mat-error>
+                  {{ 'labels.commons.Password must contain at least one number' | translate }}
+                </mat-error>
+              }
+              @if (userForm.controls.password.hasError('specialChar')) {
+                <mat-error>
+                  {{ 'labels.commons.Password must contain at least one special character (@$!%*?&-)' | translate }}
+                </mat-error>
+              }
+              @if (userForm.controls.password.hasError('repeated')) {
+                <mat-error>
+                  {{ 'labels.commons.Password must not have consecutive repeating characters' | translate }}
                 </mat-error>
               }
             </mat-form-field>
@@ -124,18 +137,13 @@
                   <strong>{{ 'labels.commons.required' | translate }}</strong>
                 </mat-error>
               }
+              @if (userForm.controls.repeatPassword.hasError('notequal')) {
+                <mat-error>
+                  {{ 'labels.inputs.Passwords' | translate }}
+                  <strong>{{ 'labels.commons.do not match' | translate }}</strong>
+                </mat-error>
+              }
             </mat-form-field>
-          }
-
-          @if (
-            userForm.errors?.passwordsDoNotMatch &&
-            !userForm.controls.password.hasError('required') &&
-            !userForm.controls.repeatPassword.hasError('required')
-          ) {
-            <p class="flex-98 reset-password-error">
-              {{ 'labels.inputs.Passwords' | translate }}
-              <strong>{{ 'labels.commons.do not match' | translate }}</strong>
-            </p>
           }
 
           <mat-form-field class="flex-48">

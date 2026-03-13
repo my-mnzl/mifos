@@ -1,4 +1,4 @@
-<div class="container">
+<div class="container" *ngIf="chargeForm">
   <mat-card>
     <form [formGroup]="chargeForm" (ngSubmit)="submit()">
       <mat-card-content>
@@ -113,19 +113,7 @@
           * In saving case: Only for 1. charge time type is "withdrawlfee" or "savings no activity fee" with charge calculation type as "% amount"
           * In shares case: Only for charge time type: SHARE_PURCHASE and SHARE_REDEEM and with charge calculation type as % amount only
           -->
-          @if (
-            (chargeForm.controls.chargeAppliesTo.value === 1 &&
-              (chargeForm.controls.chargeCalculationType.value === 2 ||
-                chargeForm.controls.chargeCalculationType.value === 3 ||
-                chargeForm.controls.chargeCalculationType.value === 4 ||
-                chargeForm.controls.chargeCalculationType.value === 5)) ||
-            (chargeForm.controls.chargeAppliesTo.value === 2 &&
-              (chargeForm.controls.chargeTimeType.value === 16 || chargeForm.controls.chargeTimeType.value === 5) &&
-              chargeForm.controls.chargeCalculationType.value === 2) ||
-            (chargeForm.controls.chargeAppliesTo.value === 4 &&
-              (chargeForm.controls.chargeTimeType.value === 14 || chargeForm.controls.chargeTimeType.value === 15) &&
-              chargeForm.controls.chargeCalculationType.value === 2)
-          ) {
+          @if (showMinMaxCap()) {
             <mat-form-field class="flex-48">
               <mat-label>{{ 'labels.inputs.Minimum Charge Cap' | translate }}</mat-label>
               <input matInput autofocus formControlName="minCap" mifosxValidateOnFocus />
@@ -138,19 +126,7 @@
               }
             </mat-form-field>
           }
-          @if (
-            (chargeForm.controls.chargeAppliesTo.value === 1 &&
-              (chargeForm.controls.chargeCalculationType.value === 2 ||
-                chargeForm.controls.chargeCalculationType.value === 3 ||
-                chargeForm.controls.chargeCalculationType.value === 4 ||
-                chargeForm.controls.chargeCalculationType.value === 5)) ||
-            (chargeForm.controls.chargeAppliesTo.value === 2 &&
-              (chargeForm.controls.chargeTimeType.value === 16 || chargeForm.controls.chargeTimeType.value === 5) &&
-              chargeForm.controls.chargeCalculationType.value === 2) ||
-            (chargeForm.controls.chargeAppliesTo.value === 4 &&
-              (chargeForm.controls.chargeTimeType.value === 14 || chargeForm.controls.chargeTimeType.value === 15) &&
-              chargeForm.controls.chargeCalculationType.value === 2)
-          ) {
+          @if (showMinMaxCap()) {
             <mat-form-field class="flex-48">
               <mat-label>{{ 'labels.inputs.Maximum Charge Cap' | translate }}</mat-label>
               <input matInput autofocus formControlName="maxCap" mifosxValidateOnFocus />

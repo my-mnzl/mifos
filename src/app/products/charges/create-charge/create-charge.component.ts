@@ -206,7 +206,8 @@ export class CreateChargeComponent implements OnInit {
         chargeCalculationType === 2 ||
         chargeCalculationType === 3 ||
         chargeCalculationType === 4 ||
-        chargeCalculationType === 5
+        chargeCalculationType === 5 ||
+        chargeCalculationType === 6
       );
     } else if (chargeAppliesTo === 2) {
       return (chargeTimeType === 16 || chargeTimeType === 5) && chargeCalculationType === 2;

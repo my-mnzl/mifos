@@ -1,5 +1,5 @@
 /** Angular Imports */
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { UntypedFormGroup, UntypedFormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
@@ -27,7 +27,7 @@ import { STANDALONE_SHARED_IMPORTS } from 'app/standalone-shared.module';
     MatCheckbox
   ]
 })
-export class EditChargeComponent implements OnInit {
+export class EditChargeComponent {
   private productsService = inject(ProductsService);
   private formBuilder = inject(UntypedFormBuilder);
   private route = inject(ActivatedRoute);
@@ -72,11 +72,8 @@ export class EditChargeComponent implements OnInit {
   constructor() {
     this.route.data.subscribe((data: { chargesTemplate: any }) => {
       this.chargeData = data.chargesTemplate;
+      this.editChargeForm();
     });
-  }
-
-  ngOnInit() {
-    this.editChargeForm();
   }
 
   /**
@@ -188,6 +185,28 @@ export class EditChargeComponent implements OnInit {
       this.chargeForm.removeControl('feeInterval');
       this.chargeForm.removeControl('feeFrequency');
     }
+  }
+
+  showMinMaxCap(): boolean {
+    const chargeAppliesTo = this.chargeForm.controls.chargeAppliesTo.value;
+    const chargeCalculationType = this.chargeForm.controls.chargeCalculationType.value;
+    const chargeTimeType = this.chargeForm.controls.chargeTimeType.value;
+
+    if (chargeAppliesTo === 1) {
+      return (
+        chargeCalculationType === 2 ||
+        chargeCalculationType === 3 ||
+        chargeCalculationType === 4 ||
+        chargeCalculationType === 5 ||
+        chargeCalculationType === 6
+      );
+    } else if (chargeAppliesTo === 2) {
+      return (chargeTimeType === 16 || chargeTimeType === 5) && chargeCalculationType === 2;
+    } else if (chargeAppliesTo === 4) {
+      return (chargeTimeType === 14 || chargeTimeType === 15) && chargeCalculationType === 2;
+    }
+
+    return false;
   }
 
   /**
