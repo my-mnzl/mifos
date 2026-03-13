@@ -3,10 +3,17 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 
 /** rxjs Imports */
-import { Observable } from 'rxjs';
+import { Observable, forkJoin } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { Dates } from 'app/core/utils/dates';
 import { SettingsService } from 'app/settings/settings.service';
 import { DisbursementData } from './models/loan-account.model';
+
+interface StandingInstructionsResponse {
+  pageItems: any[];
+  totalFilteredRecords: number;
+  totalRecords: number;
+}
 
 /**
  * Loans service.
@@ -488,20 +495,55 @@ export class LoansService {
   getStandingInstructions(
     clientId: string,
     clientName: string,
-    fromAccountId: string,
+    accountId: string,
     locale: string,
     dateFormat: string
-  ): Observable<any> {
-    const httpParams = new HttpParams()
+  ): Observable<StandingInstructionsResponse> {
+    const baseParams = new HttpParams()
       .set('clientId', clientId)
       .set('clientName', clientName)
-      .set('fromAccountId', fromAccountId)
-      .set('fromAccountType', '1')
       .set('locale', locale)
       .set('dateFormat', dateFormat)
       .set('limit', '14')
       .set('offset', '0');
-    return this.http.get(`/standinginstructions`, { params: httpParams });
+
+    const fromAccountRequest = this.http.get<StandingInstructionsResponse>(`/standinginstructions`, {
+      params: baseParams.set('fromAccountId', accountId).set('fromAccountType', '1')
+    });
+    const toAccountRequest = this.http.get<StandingInstructionsResponse>(`/standinginstructions`, {
+      params: baseParams.set('toAccountId', accountId).set('toAccountType', '1')
+    });
+
+    return forkJoin([
+      fromAccountRequest,
+      toAccountRequest
+    ]).pipe(
+      map(
+        ([
+          fromResults,
+          toResults
+        ]) => {
+          const instructionMap = new Map<number, any>();
+
+          [
+            ...(fromResults?.pageItems || []),
+            ...(toResults?.pageItems || [])
+          ].forEach((instruction: any) => {
+            if (instruction?.id) {
+              instructionMap.set(instruction.id, instruction);
+            }
+          });
+
+          const pageItems = Array.from(instructionMap.values());
+
+          return {
+            pageItems,
+            totalFilteredRecords: pageItems.length,
+            totalRecords: pageItems.length
+          };
+        }
+      )
+    );
   }
 
   updateLoansAccount(loanId: any, loanData: any): Observable<any> {

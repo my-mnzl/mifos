@@ -3,7 +3,14 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 
 /** rxjs Imports */
-import { Observable } from 'rxjs';
+import { Observable, forkJoin } from 'rxjs';
+import { map } from 'rxjs/operators';
+
+interface StandingInstructionsResponse {
+  pageItems: any[];
+  totalFilteredRecords: number;
+  totalRecords: number;
+}
 
 /**
  * Savings Service.
@@ -76,18 +83,55 @@ export class SavingsService {
   getStandingInstructions(
     clientId: string,
     clientName: string,
-    fromAccountId: string,
+    accountId: string,
     locale: string,
     dateFormat: string
-  ): Observable<any> {
-    const httpParams = new HttpParams()
+  ): Observable<StandingInstructionsResponse> {
+    const baseParams = new HttpParams()
       .set('clientId', clientId)
       .set('clientName', clientName)
-      .set('fromAccountId', fromAccountId)
-      .set('fromAccountType', '2')
       .set('locale', locale)
-      .set('dateFormat', dateFormat);
-    return this.http.get(`/standinginstructions`, { params: httpParams });
+      .set('dateFormat', dateFormat)
+      .set('limit', '14')
+      .set('offset', '0');
+
+    const fromAccountRequest = this.http.get<StandingInstructionsResponse>(`/standinginstructions`, {
+      params: baseParams.set('fromAccountId', accountId).set('fromAccountType', '2')
+    });
+    const toAccountRequest = this.http.get<StandingInstructionsResponse>(`/standinginstructions`, {
+      params: baseParams.set('toAccountId', accountId).set('toAccountType', '2')
+    });
+
+    return forkJoin([
+      fromAccountRequest,
+      toAccountRequest
+    ]).pipe(
+      map(
+        ([
+          fromResults,
+          toResults
+        ]) => {
+          const instructionMap = new Map<number, any>();
+
+          [
+            ...(fromResults?.pageItems || []),
+            ...(toResults?.pageItems || [])
+          ].forEach((instruction: any) => {
+            if (instruction?.id) {
+              instructionMap.set(instruction.id, instruction);
+            }
+          });
+
+          const pageItems = Array.from(instructionMap.values());
+
+          return {
+            pageItems,
+            totalFilteredRecords: pageItems.length,
+            totalRecords: pageItems.length
+          };
+        }
+      )
+    );
   }
 
   /**
