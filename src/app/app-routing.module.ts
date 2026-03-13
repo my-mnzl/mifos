@@ -15,6 +15,10 @@ const routes: Routes = [
     component: CallbackComponent
   },
   {
+    path: 'auth/callback',
+    component: CallbackComponent
+  },
+  {
     path: '**',
     component: NotFoundComponent
   }

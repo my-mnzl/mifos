@@ -66,14 +66,38 @@ function getOIDCConfig(): AuthConfig {
  */
 function getOAuth2Config(): AuthConfig {
   const frontendUrl = window.location.origin;
+  const redirectUri = environment.oauth.redirectUri || `${frontendUrl}/callback`;
+  const postLogoutRedirectUri = environment.oauth.postLogoutRedirectUri || `${frontendUrl}/#/login`;
+  const clientId = environment.oauth.clientId || environment.oauth.appId;
+  const usesExternalProvider = !!(environment.oauth.issuerUrl || environment.oauth.providerName);
+
+  if (usesExternalProvider) {
+    return {
+      issuer: environment.oauth.issuerUrl || environment.oauth.serverUrl,
+      loginUrl: environment.oauth.authorizeUrl || undefined,
+      tokenEndpoint: environment.oauth.tokenUrl || undefined,
+      redirectUri,
+      postLogoutRedirectUri,
+      clientId,
+      responseType: 'code',
+      scope: environment.oauth.scope,
+      useSilentRefresh: false,
+      oidc: true,
+      strictDiscoveryDocumentValidation: false,
+      requireHttps: environment.production,
+      showDebugInformation: !environment.production,
+      sessionChecksEnabled: false,
+      clearHashAfterLogin: false
+    };
+  }
 
   return {
     issuer: environment.oauth.serverUrl,
     loginUrl: environment.oauth.authorizeUrl,
     tokenEndpoint: environment.oauth.tokenUrl,
-    redirectUri: environment.oauth.redirectUri,
-    postLogoutRedirectUri: `${frontendUrl}/#/login`,
-    clientId: environment.oauth.appId,
+    redirectUri,
+    postLogoutRedirectUri,
+    clientId,
     responseType: 'code',
     scope: environment.oauth.scope,
     useSilentRefresh: false,

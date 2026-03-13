@@ -23,8 +23,11 @@
         const urlParams = new URLSearchParams(window.location.search);
         return urlParams.get(param);
       }
+      function isOAuthCallbackPath(pathname) {
+        return pathname.endsWith('/callback') || pathname.endsWith('/auth/callback');
+      }
       const code = getQueryParam('code');
-      if (code) {
+      if (code && isOAuthCallbackPath(window.location.pathname)) {
         sessionStorage.setItem('oauth_callback_query', window.location.search);
         window.location.href = '/#/callback';
       }

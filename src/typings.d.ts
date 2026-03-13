@@ -20,17 +20,30 @@ interface Window {
     fineractApiUrls?: string;
     fineractApiUrl?: string;
     allow_switching_backend_instance?: boolean;
+    allowServerSwitch?: string | boolean;
     apiProvider?: string;
     apiVersion?: string;
-    oauthServerEnabled?: boolean;
+    apiActuator?: string;
+    enableRememberMe?: string | boolean;
+    oauthServerEnabled?: string | boolean;
     oauthServerUrl?: string;
+    oauthServerLogoutUrl?: string;
     oauthAppId?: string;
+    oauthClientId?: string;
+    oauthProviderName?: string;
+    oauthIssuerUrl?: string;
+    oauthAuthorizeUrl?: string;
+    oauthTokenUrl?: string;
+    oauthRedirectUri?: string;
+    oauthPostLogoutRedirectUri?: string;
+    oauthScope?: string;
     defaultLanguage?: string;
     supportedLanguages?: string;
     preloadClients?: boolean;
     defaultCharDelimiter?: string;
     displayBackEndInfo?: string;
     displayTenantSelector?: string;
+    tenantLogoUrl?: string;
     waitTimeForNotifications?: number;
     waitTimeForCOBCatchUp?: number;
     sessionIdleTimeout?: number;
@@ -39,6 +52,11 @@ interface Window {
     vNextApiVersion?: string;
     interbankTransfers?: boolean;
     minPasswordLength?: number;
+    oidcServerEnabled?: string | boolean;
+    oidcBaseUrl?: string;
+    oidcClientId?: string;
+    oidcApiUrl?: string;
+    oidcFrontUrl?: string;
   };
 }
 

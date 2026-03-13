@@ -2,7 +2,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 /** rxjs Imports */
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import { BehaviorSubject, Observable, from, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 /** 3rd party Imports */
@@ -58,6 +58,7 @@ export class AuthenticationService {
   private credentials: Credentials;
   private dialogShown = false;
   private authMode: AuthMode = AuthMode.Basic;
+  private oauthDiscoveryInitialized = false;
 
   /** Key to store credentials in storage. */
   private readonly credentialsStorageKey = 'mifosXCredentials';
@@ -173,8 +174,12 @@ export class AuthenticationService {
 
     if (this.authMode !== AuthMode.Basic) {
       // OAuth2/OIDC: Redirect to authorization server with PKCE
-      this.oauthService.initCodeFlow();
-      return of(true);
+      return from(
+        this.prepareOAuthLogin().then(() => {
+          this.oauthService.initCodeFlow();
+          return true;
+        })
+      );
     }
 
     if (!loginContext) {
@@ -222,6 +227,13 @@ export class AuthenticationService {
           }
         });
       } else if (this.authMode === AuthMode.OAuth2) {
+        if (this.usesExternalOAuthProvider()) {
+          this.getExternalOAuthUserDetails(accessToken)
+            .then(() => resolve())
+            .catch((error) => reject(error));
+          return;
+        }
+
         const headers = new HttpHeaders().set('Authorization', `Bearer ${accessToken}`);
         const url = `${environment.oauth.serverUrl}/userdetails`;
         this.http.get<Credentials>(url, { headers }).subscribe({
@@ -289,6 +301,8 @@ export class AuthenticationService {
    */
   async handleOAuthCallback(): Promise<boolean> {
     try {
+      await this.prepareOAuthLogin();
+
       // index.html preserves the OAuth callback query string in sessionStorage before redirecting to /#/callback, since Angular routing consumes query params before the OAuth library can process them.
       let queryString = sessionStorage.getItem('oauth_callback_query');
 
@@ -334,6 +348,11 @@ export class AuthenticationService {
       // OIDC: Use library to handle logout (redirects to OIDC provider)
       this.oauthService.logOut();
     } else if (this.authMode === AuthMode.OAuth2) {
+      if (this.usesExternalOAuthProvider() && !environment.oauth.logoutUrl) {
+        this.oauthService.logOut();
+        return of(true);
+      }
+
       // OAuth2 (Fineract): Clear library tokens and server session
       this.oauthService.logOut(true); // true = don't redirect
       // Call Fineract logout endpoint in a popup to clear server session (includes JSESSIONID cookie)
@@ -378,6 +397,103 @@ export class AuthenticationService {
    */
   getCredentials(): Credentials | null {
     return JSON.parse(this.storage.getItem(this.credentialsStorageKey));
+  }
+
+  private async prepareOAuthLogin(): Promise<void> {
+    if (!this.shouldUseDiscoveryDocument() || this.oauthDiscoveryInitialized) {
+      return;
+    }
+
+    await this.oauthService.loadDiscoveryDocument();
+    this.oauthDiscoveryInitialized = true;
+  }
+
+  private shouldUseDiscoveryDocument(): boolean {
+    return this.authMode === AuthMode.OAuth2 && this.usesExternalOAuthProvider();
+  }
+
+  private usesExternalOAuthProvider(): boolean {
+    return !!(environment.oauth.issuerUrl || environment.oauth.providerName);
+  }
+
+  private async getExternalOAuthUserDetails(accessToken: string): Promise<void> {
+    const claims = await this.getExternalOAuthClaims();
+    const groups = this.toStringArray(claims['groups']);
+    const roles = this.toRoleObjects(this.toStringArray(claims['roles']), groups);
+    const username = this.readClaim(claims, [
+      'preferred_username',
+      'username',
+      'sub'
+    ]) || 'oauth-user';
+
+    const credentials: Credentials = {
+      accessToken,
+      authenticated: true,
+      officeId: 0,
+      officeName: '',
+      staffDisplayName:
+        this.readClaim(claims, [
+          'name',
+          'given_name',
+          'nickname',
+          'preferred_username'
+        ]) || username,
+      organizationalRole: groups,
+      permissions: this.toStringArray(claims['permissions']),
+      roles,
+      userId: Number(this.readClaim(claims, ['user_id'])) || 0,
+      username,
+      shouldRenewPassword: false
+    };
+
+    this.onLoginSuccess(credentials);
+  }
+
+  private async getExternalOAuthClaims(): Promise<Record<string, any>> {
+    const identityClaims = this.oauthService.getIdentityClaims() as Record<string, any> | null;
+
+    if (identityClaims) {
+      return identityClaims;
+    }
+
+    await this.prepareOAuthLogin();
+
+    try {
+      return (await this.oauthService.loadUserProfile()) as Record<string, any>;
+    } catch {
+      return {};
+    }
+  }
+
+  private readClaim(claims: Record<string, any>, keys: string[]): string | undefined {
+    for (const key of keys) {
+      const value = claims[key];
+      if (typeof value === 'string' && value.trim() !== '') {
+        return value;
+      }
+      if (typeof value === 'number' && Number.isFinite(value)) {
+        return value.toString();
+      }
+    }
+
+    return undefined;
+  }
+
+  private toStringArray(value: unknown): string[] {
+    if (!Array.isArray(value)) {
+      return [];
+    }
+
+    return value.filter((entry): entry is string => typeof entry === 'string' && entry.trim() !== '');
+  }
+
+  private toRoleObjects(roleNames: string[], fallbackRoleNames: string[]) {
+    const resolvedRoleNames = roleNames.length > 0 ? roleNames : fallbackRoleNames;
+
+    return resolvedRoleNames.map((roleName) => ({
+      name: roleName,
+      description: roleName
+    }));
   }
 
   /**

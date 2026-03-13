@@ -26,6 +26,9 @@
   // Display or not the Server Selector
   window['env']['allowServerSwitch'] = '$MIFOS_ALLOW_SERVER_SWITCH_SELECTOR';
 
+  // Enable Remember Me support
+  window['env']['enableRememberMe'] = '$MIFOS_ENABLE_REMEMBER_ME';
+
   // Display or not the BackEnd Info
   window['env']['displayBackEndInfo'] = '$MIFOS_DISPLAY_BACKEND_INFO';
 
@@ -47,8 +50,33 @@
   // OAuth Server URL
   window['env']['oauthServerUrl'] = '$MIFOS_OAUTH_SERVER_URL';
 
+  // OAuth Provider Name
+  window['env']['oauthProviderName'] = '$MIFOS_OAUTH_PROVIDER_NAME';
+
+  // OAuth Issuer URL
+  window['env']['oauthIssuerUrl'] = '$MIFOS_OAUTH_ISSUER_URL';
+
   // OAuth Client Id
   window['env']['oauthAppId'] = '$MIFOS_OAUTH_CLIENT_ID';
+  window['env']['oauthClientId'] = '$MIFOS_OAUTH_CLIENT_ID';
+
+  // OAuth logout URL
+  window['env']['oauthServerLogoutUrl'] = '$MIFOS_OAUTH_SERVER_LOGOUT_URL';
+
+  // OAuth authorize URL
+  window['env']['oauthAuthorizeUrl'] = '$MIFOS_OAUTH_AUTHORIZE_URL';
+
+  // OAuth token URL
+  window['env']['oauthTokenUrl'] = '$MIFOS_OAUTH_TOKEN_URL';
+
+  // OAuth redirect URI
+  window['env']['oauthRedirectUri'] = '$MIFOS_OAUTH_REDIRECT_URI';
+
+  // OAuth post logout redirect URI
+  window['env']['oauthPostLogoutRedirectUri'] = '$MIFOS_OAUTH_POST_LOGOUT_REDIRECT_URI';
+
+  // OAuth scopes
+  window['env']['oauthScope'] = '$MIFOS_OAUTH_SCOPE';
 
   // Min Password length
   window['env']['minPasswordLength'] = '$MIFOS_MIN_PASSWORD_LENGTH';

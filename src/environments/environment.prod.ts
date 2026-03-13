@@ -4,72 +4,109 @@ import env from './.env';
 // The `window['env']` object is loaded in the `index.html` file
 const loadedEnv = window['env'] || {};
 
+function readFirstValue<T>(...values: T[]): T {
+  return values.find((value) => value !== undefined && value !== null && value !== '') as T;
+}
+
+function readBoolean(value: unknown, fallback = false): boolean {
+  if (value === true || value === 'true') {
+    return true;
+  }
+  if (value === false || value === 'false') {
+    return false;
+  }
+  return fallback;
+}
+
+const defaultApiUrls =
+  'https://sandbox.mifos.community,https://demo.mifos.community,https://localhost:8443,' + window.location.origin;
+const baseApiUrls = readFirstValue<string>(loadedEnv['fineractApiUrls'], defaultApiUrls);
+const baseApiUrl = readFirstValue<string>(
+  loadedEnv['fineractApiUrl'],
+  baseApiUrls?.length > 0 ? baseApiUrls.split(',')[0] : window.location.origin
+);
+const oauthClientId = readFirstValue<string>(loadedEnv['oauthAppId'], loadedEnv['oauthClientId'], '');
+const oauthRedirectUri = readFirstValue<string>(loadedEnv['oauthRedirectUri'], `${window.location.origin}/callback`);
+const oauthPostLogoutRedirectUri = readFirstValue<string>(
+  loadedEnv['oauthPostLogoutRedirectUri'],
+  `${window.location.origin}/#/login`
+);
+const oauthServerUrl = readFirstValue<string>(loadedEnv['oauthServerUrl'], '');
+const oauthIssuerUrl = readFirstValue<string>(loadedEnv['oauthIssuerUrl'], '');
+const oauthProviderName = readFirstValue<string>(loadedEnv['oauthProviderName'], '');
+
 export const environment = {
   production: true,
   version: env.mifos_x.version,
   hash: env.mifos_x.hash,
   // For connecting to server running elsewhere update the tenant identifier
-  fineractPlatformTenantId: loadedEnv['fineractPlatformTenantId'] || 'default',
-  fineractPlatformTenantIds: loadedEnv['fineractPlatformTenantIds'] || 'default',
+  fineractPlatformTenantId: readFirstValue<string>(loadedEnv['fineractPlatformTenantId'], 'default'),
+  fineractPlatformTenantIds: readFirstValue<string>(loadedEnv['fineractPlatformTenantIds'], 'default'),
   // For connecting to others servers running elsewhere update the base API URL
-  baseApiUrls:
-    loadedEnv['fineractApiUrls'] ||
-    'https://sandbox.mifos.community,https://demo.mifos.community,https://localhost:8443,' + window.location.origin,
+  baseApiUrls,
   // For connecting to server running elsewhere set the base API URL
-  baseApiUrl:
-    loadedEnv['fineractApiUrl'] ||
-    (loadedEnv['fineractApiUrls']?.length > 0 ? loadedEnv['fineractApiUrls'].split(',')[0] : window.location.origin),
-  oauthServerUrl: loadedEnv['oauthServerUrl'] || loadedEnv['fineractApiUrl'] + loadedEnv['apiProvider'],
-  allowServerSwitch: loadedEnv.allowServerSwitch || 'true',
-  apiProvider: loadedEnv['apiProvider'] || '/fineract-provider/api',
-  apiVersion: loadedEnv['apiVersion'] || '/v1',
-  apiActuator: loadedEnv.apiActuator || '/fineract-provider',
+  baseApiUrl,
+  oauthServerUrl: readFirstValue<string>(oauthServerUrl, oauthIssuerUrl, baseApiUrl),
+  allowServerSwitch: readFirstValue<string | boolean>(
+    loadedEnv['allowServerSwitch'],
+    env.allow_switching_backend_instance,
+    'true'
+  ),
+  apiProvider: readFirstValue<string>(loadedEnv['apiProvider'], '/fineract-provider/api'),
+  apiVersion: readFirstValue<string>(loadedEnv['apiVersion'], '/v1'),
+  apiActuator: readFirstValue<string>(loadedEnv['apiActuator'], '/fineract-provider'),
   serverUrl: '',
   oauth: {
-    enabled: loadedEnv.oauthServerEnabled === true,
-    serverUrl: loadedEnv.oauthServerUrl || '',
-    logoutUrl: loadedEnv.oauthServerLogoutUrl || '',
-    appId: loadedEnv.oauthAppId || '',
-    authorizeUrl: loadedEnv.oauthAuthorizeUrl || '',
-    tokenUrl: loadedEnv.oauthTokenUrl || '',
-    redirectUri: loadedEnv.oauthRedirectUri || '',
-    scope: loadedEnv.oauthScope || ''
+    enabled: readBoolean(loadedEnv['oauthServerEnabled'], false),
+    providerName: oauthProviderName,
+    issuerUrl: oauthIssuerUrl,
+    serverUrl: readFirstValue<string>(oauthServerUrl, oauthIssuerUrl, ''),
+    logoutUrl: readFirstValue<string>(loadedEnv['oauthServerLogoutUrl'], ''),
+    appId: oauthClientId,
+    clientId: oauthClientId,
+    authorizeUrl: readFirstValue<string>(loadedEnv['oauthAuthorizeUrl'], ''),
+    tokenUrl: readFirstValue<string>(loadedEnv['oauthTokenUrl'], ''),
+    redirectUri: oauthRedirectUri,
+    scope: readFirstValue<string>(loadedEnv['oauthScope'], 'openid profile email offline_access'),
+    postLogoutRedirectUri: oauthPostLogoutRedirectUri
   },
   /** Feature flag for Remember Me functionality */
-  enableRememberMe: false,
+  enableRememberMe: readBoolean(loadedEnv['enableRememberMe'], false),
   warningDialog: {
-    title: 'Warning',
+    title: 'Notice',
     content:
       'This system is for authorized use only. Unauthorized access will result in possible legal action. By accessing this system, you acknowledge that you are authorized to do so and that all data stored and processed here is confidential.',
-    buttonText: 'Close'
+    buttonText: 'Acknowledge'
   },
-  defaultLanguage: loadedEnv['defaultLanguage'] || 'en-US',
-  supportedLanguages:
-    loadedEnv['supportedLanguages'] || 'cs-CS,de-DE,en-US,es-MX,fr-FR,it-IT,ko-KO,lt-LT,lv-LV,ne-NE,pt-PT,sw-SW',
+  defaultLanguage: readFirstValue<string>(loadedEnv['defaultLanguage'], 'en-US'),
+  supportedLanguages: readFirstValue<string>(
+    loadedEnv['supportedLanguages'],
+    'cs-CS,de-DE,en-US,es-MX,fr-FR,it-IT,ko-KO,lt-LT,lv-LV,ne-NE,pt-PT,sw-SW'
+  ),
   preloadClients: loadedEnv['preloadClients'] || true,
 
-  defaultCharDelimiter: loadedEnv['defaultCharDelimiter'] || ',',
+  defaultCharDelimiter: readFirstValue<string>(loadedEnv['defaultCharDelimiter'], ','),
 
-  displayBackEndInfo: loadedEnv['displayBackEndInfo'] || 'true',
-  displayTenantSelector: loadedEnv['displayTenantSelector'] || 'true',
-  tenantLogoUrl: loadedEnv['tenantLogoUrl'] || 'assets/images/mifos_lg-logo.png',
+  displayBackEndInfo: readFirstValue<string>(loadedEnv['displayBackEndInfo'], 'true'),
+  displayTenantSelector: readFirstValue<string>(loadedEnv['displayTenantSelector'], 'true'),
+  tenantLogoUrl: readFirstValue<string>(loadedEnv['tenantLogoUrl'], 'assets/images/mifos_lg-logo.png'),
   // Time in seconds, default 60 seconds
-  waitTimeForNotifications: loadedEnv['waitTimeForNotifications'] || 60,
+  waitTimeForNotifications: readFirstValue<number>(loadedEnv['waitTimeForNotifications'], 60),
   // Time in seconds, default 30 seconds
-  waitTimeForCOBCatchUp: loadedEnv['waitTimeForCOBCatchUp'] || 30,
+  waitTimeForCOBCatchUp: readFirstValue<number>(loadedEnv['waitTimeForCOBCatchUp'], 30),
   session: {
     timeout: {
-      idleTimeout: loadedEnv['sessionIdleTimeout'] || 300000 // 5 minutes
+      idleTimeout: readFirstValue<number>(loadedEnv['sessionIdleTimeout'], 300000) // 5 minutes
     }
   },
-  httpCacheEnabled: loadedEnv.httpCacheEnabled || false,
+  httpCacheEnabled: readBoolean(loadedEnv['httpCacheEnabled'], false),
 
-  vNextApiUrl: window['env']['vNextApiUrl'] || 'https://apis.mifos.community',
-  vNextApiProvider: window['env']['vNextApiProvider'] || '/vnext1',
-  vNextApiVersion: window['env']['vNextApiVersion'] || '/v1.0',
-  interbankTransfers: window['env']['interbankTransfers'] || false,
+  vNextApiUrl: readFirstValue<string>(window['env']?.['vNextApiUrl'], 'https://apis.mifos.community'),
+  vNextApiProvider: readFirstValue<string>(window['env']?.['vNextApiProvider'], '/vnext1'),
+  vNextApiVersion: readFirstValue<string>(window['env']?.['vNextApiVersion'], '/v1.0'),
+  interbankTransfers: readBoolean(window['env']?.['interbankTransfers'], false),
 
-  minPasswordLength: loadedEnv['minPasswordLength'] || 12,
+  minPasswordLength: readFirstValue<number>(loadedEnv['minPasswordLength'], 12),
 
   OIDC: {
     oidcServerEnabled: window['env']['oidcServerEnabled'] === true || window['env']['oidcServerEnabled'] === 'true',

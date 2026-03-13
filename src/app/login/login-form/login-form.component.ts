@@ -42,6 +42,8 @@ export class LoginFormComponent implements OnInit {
   loading = false;
   /** Whether OAuth (OIDC or OAuth2) is enabled */
   oauthEnabled = environment.OIDC.oidcServerEnabled || environment.oauth.enabled;
+  /** Optional label for the external auth provider */
+  oauthProviderName = environment.oauth.providerName;
   /** Whether remember me functionality is enabled */
   enableRememberMe = environment.enableRememberMe === true;
 
@@ -138,5 +140,9 @@ export class LoginFormComponent implements OnInit {
       return `Minimum length is ${control.errors?.minlength.requiredLength}`;
     }
     return '';
+  }
+
+  get oauthButtonLabel(): string {
+    return this.oauthProviderName ? `Continue with ${this.oauthProviderName}` : 'Login';
   }
 }
