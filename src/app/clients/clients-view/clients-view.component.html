@@ -418,6 +418,15 @@
       >
         {{ 'labels.inputs.Notes' | translate }}
       </a>
+      <a
+        mat-tab-link
+        [routerLink]="['./transactions']"
+        routerLinkActive
+        #transactions="routerLinkActive"
+        [active]="transactions.isActive"
+      >
+        {{ 'labels.inputs.Transactions' | translate }}
+      </a>
       @for (clientDatatable of clientDatatables; track clientDatatable) {
         <a
           mat-tab-link

@@ -1,0 +1,67 @@
+@use 'assets/styles/helper';
+@use 'assets/styles/colours' as *;
+
+.container {
+  padding-bottom: 2%;
+
+  .action-button {
+    width: 100%;
+    height: 100%;
+  }
+
+  .accruals {
+    padding-top: 1%;
+  }
+
+  table {
+    width: 100%;
+
+    .strike {
+      text-decoration: line-through;
+      color: $status-active-overdue;
+    }
+
+    .linked {
+      color: $status-approved;
+    }
+
+    .accrual {
+      color: $msg-default;
+    }
+
+    .down-payment {
+      color: $status-downpayment;
+    }
+
+    .chargeoff {
+      color: $status-chargeoff;
+    }
+
+    .reage {
+      color: $status-reage;
+    }
+
+    .reamortize {
+      color: $status-reamortize;
+    }
+  }
+
+  tr {
+    th,
+    td {
+      &:not(.td-min-space) {
+        padding-left: 4px;
+        padding-right: 4px;
+      }
+    }
+  }
+}
+
+.select-row:hover {
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.td-min-space {
+  min-width: 60px;
+}

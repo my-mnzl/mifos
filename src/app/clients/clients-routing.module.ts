@@ -16,6 +16,7 @@ import { NotesTabComponent } from './clients-view/notes-tab/notes-tab.component'
 import { DocumentsTabComponent } from './clients-view/documents-tab/documents-tab.component';
 import { DatatableTabComponent } from './clients-view/datatable-tab/datatable-tab.component';
 import { AddressTabComponent } from './clients-view/address-tab/address-tab.component';
+import { ClientTransactionsTabComponent } from './clients-view/transactions-tab/transactions-tab.component';
 import { ClientActionsComponent } from './clients-view/client-actions/client-actions.component';
 import { ViewChargeComponent } from './clients-view/charges/view-charge/view-charge.component';
 import { ClientPayChargesComponent } from './clients-view/charges/client-pay-charges/client-pay-charges.component';
@@ -160,6 +161,11 @@ const routes: Routes = [
               resolve: {
                 clientNotes: ClientNotesResolver
               }
+            },
+            {
+              path: 'transactions',
+              component: ClientTransactionsTabComponent,
+              data: { title: 'Transactions', breadcrumb: 'Transactions', routeParamBreadcrumb: false }
             },
             {
               path: 'datatables',
