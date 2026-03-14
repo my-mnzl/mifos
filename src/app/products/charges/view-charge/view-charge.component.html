@@ -109,25 +109,25 @@
           {{ chargeData.active === true | yesNo }}
         </div>
 
-        @if (chargeData.chargeTimeType.id === 9 && chargeData.feeFrequency) {
+        @if (showRecurringFeeDetails() && chargeData.feeFrequency) {
           <div class="flex-50 mat-body-strong">
             {{ 'labels.inputs.Add Fee Frequency' | translate }}
           </div>
         }
 
-        @if (chargeData.chargeTimeType.id === 9 && chargeData.feeFrequency && chargeData.feeFrequency) {
+        @if (showRecurringFeeDetails() && chargeData.feeFrequency && chargeData.feeFrequency) {
           <div class="flex-50">
             {{ chargeData.feeFrequency.value | translateKey: 'catalogs' }}
           </div>
         }
 
-        @if (chargeData.chargeTimeType.id === 9 && chargeData.feeInterval) {
+        @if (showRecurringFeeDetails() && chargeData.feeInterval) {
           <div class="flex-50 mat-body-strong">
             {{ 'labels.inputs.Frequency Interval' | translate }}
           </div>
         }
 
-        @if (chargeData.chargeTimeType.id === 9 && chargeData.feeInterval) {
+        @if (showRecurringFeeDetails() && chargeData.feeInterval) {
           <div class="flex-50">
             {{ chargeData.feeInterval }}
           </div>

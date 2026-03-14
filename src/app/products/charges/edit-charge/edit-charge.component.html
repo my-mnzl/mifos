@@ -64,7 +64,7 @@
           <mat-form-field class="flex-48">
             <mat-label>{{ 'labels.inputs.Charge Calculation' | translate }}</mat-label>
             <mat-select required formControlName="chargeCalculationType">
-              @for (chargeCalculation of chargeCalculationTypeOptions; track chargeCalculation) {
+              @for (chargeCalculation of filteredChargeCalculationType(); track chargeCalculation) {
                 <mat-option [value]="chargeCalculation.id">
                   {{ chargeCalculation.value | translateKey: 'catalogs' }}
                 </mat-option>
@@ -174,11 +174,11 @@
             }
           </mat-form-field>
 
-          @if (addFeeFrequency) {
+          @if (isOverdueChargeTimeSelected()) {
             <div class="password-never-expires-wrapper checkbox flex-48">
               <mat-checkbox
                 labelPosition="before"
-                [checked]="addFeeFrequency && showFeeOptions"
+                [checked]="showFeeOptions"
                 (change)="getFeeFrequency($event.checked)"
               >
                 {{ 'labels.inputs.Add Fee Frequency' | translate }}
@@ -186,7 +186,7 @@
             </div>
           }
 
-          @if (addFeeFrequency && showFeeOptions) {
+          @if (showFeeOptions) {
             <mat-form-field class="flex-48">
               <mat-label>{{ 'labels.inputs.Frequency Interval' | translate }}</mat-label>
               <input matInput required autofocus type="text" formControlName="feeInterval" />
@@ -196,14 +196,25 @@
                   <strong>{{ 'labels.commons.required' | translate }}</strong>
                 </mat-error>
               }
+              @if (chargeForm.controls.feeInterval.hasError('pattern')) {
+                <mat-error>
+                  {{ 'labels.inputs.Frequency Interval' | translate }}
+                  <strong>{{ 'labels.commons.must be a positive integer' | translate }}</strong>
+                </mat-error>
+              }
             </mat-form-field>
           }
 
-          @if (addFeeFrequency && showFeeOptions) {
+          @if (showFeeOptions) {
             <mat-form-field class="flex-48">
               <mat-label>{{ 'labels.inputs.Charge Frequency' | translate }}</mat-label>
               <mat-select required formControlName="feeFrequency">
-                @for (chargeFrequency of chargeData.feeFrequencyOptions; track chargeFrequency) {
+                @for (
+                  chargeFrequency of isPeriodicChargeTimeSelected()
+                    ? periodicFeeFrequencyOptions
+                    : chargeData.feeFrequencyOptions;
+                  track chargeFrequency
+                ) {
                   <mat-option [value]="chargeFrequency.id">
                     {{ chargeFrequency.value | translateKey: 'catalogs' }}
                   </mat-option>

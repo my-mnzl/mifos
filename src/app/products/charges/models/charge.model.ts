@@ -37,6 +37,7 @@ export enum ChargeAppliesToCode {
   ChargeTimeTypeAnnualFee = 'chargeTimeType.annualFee',
   ChargeTimeTypeDisbursement = 'chargeTimeType.disbursement',
   ChargeTimeTypeInstalmentFee = 'chargeTimeType.instalmentFee',
+  ChargeTimeTypeLoanPeriodic = 'chargeTimeType.loanPeriodic',
   ChargeTimeTypeMonthlyFee = 'chargeTimeType.monthlyFee',
   ChargeTimeTypeOverdueInstallment = 'chargeTimeType.overdueInstallment',
   ChargeTimeTypeSavingsActivation = 'chargeTimeType.savingsActivation',

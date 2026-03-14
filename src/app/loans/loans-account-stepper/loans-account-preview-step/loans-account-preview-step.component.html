@@ -320,24 +320,22 @@
         <ng-container matColumnDef="date">
           <th mat-header-cell *matHeaderCellDef>{{ 'labels.inputs.Date' | translate }}</th>
           <td mat-cell *matCellDef="let charge">
-            @if (charge.chargeTimeType.value === 'Specified due date' || charge.chargeTimeType.value === 'Weekly Fee') {
+            @if (showsDueDate(charge)) {
               <span>
                 {{ (charge.dueDate | dateFormat) || 'Unassigned' }}
               </span>
             }
-            @if (charge.chargeTimeType.value === 'Monthly Fee' || charge.chargeTimeType.value === 'Annual Fee') {
+            @if (showsFeeOnMonthDay(charge)) {
               <span>
                 {{ (charge.feeOnMonthDay | dateFormat) || 'Unassigned' }}
               </span>
             }
-            @if (
-              !(
-                charge.chargeTimeType.value === 'Monthly Fee' ||
-                charge.chargeTimeType.value === 'Annual Fee' ||
-                charge.chargeTimeType.value === 'Specified due date' ||
-                charge.chargeTimeType.value === 'Weekly Fee'
-              )
-            ) {
+            @if (showsPeriodicSummary(charge)) {
+              <span>
+                {{ getPeriodicChargeSummary(charge) }}
+              </span>
+            }
+            @if (!(showsDueDate(charge) || showsFeeOnMonthDay(charge) || showsPeriodicSummary(charge))) {
               <span>
                 {{ 'labels.inputs.N/A' | translate }}
               </span>

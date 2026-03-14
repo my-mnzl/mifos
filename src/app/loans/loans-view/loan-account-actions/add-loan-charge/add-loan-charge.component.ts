@@ -14,6 +14,7 @@ import { LoansService } from '../../../loans.service';
 import { SettingsService } from 'app/settings/settings.service';
 import { Dates } from 'app/core/utils/dates';
 import { STANDALONE_SHARED_IMPORTS } from 'app/standalone-shared.module';
+import { isSpecifiedDueDateChargeTime } from 'app/core/utils/charge-time-type';
 
 /**
  * Create Add Loan Charge component.
@@ -52,6 +53,7 @@ export class AddLoanChargeComponent implements OnInit {
       value: any;
     };
     chargeTimeType: {
+      code?: string;
       id: number;
       value: any;
     };
@@ -84,7 +86,10 @@ export class AddLoanChargeComponent implements OnInit {
       const chargeDetails = this.loanChargeOptions.find((option) => {
         return option.id === chargeId;
       });
-      if (chargeDetails.chargeTimeType.id === 2) {
+      if (!chargeDetails) {
+        return;
+      }
+      if (isSpecifiedDueDateChargeTime(chargeDetails.chargeTimeType)) {
         this.loanChargeForm.addControl('dueDate', new UntypedFormControl('', Validators.required));
       } else {
         this.loanChargeForm.removeControl('dueDate');
