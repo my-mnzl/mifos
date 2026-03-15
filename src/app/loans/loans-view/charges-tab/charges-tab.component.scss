@@ -6,6 +6,46 @@
     margin: 1% auto;
   }
 
+  .product-periodic-charges {
+    margin-bottom: 2rem;
+    padding: 1.25rem;
+    border: 1px solid rgb(0 0 0 / 8%);
+    border-radius: 8px;
+    background: #f7faf7;
+  }
+
+  .product-periodic-charges__description {
+    margin: 0 0 1rem;
+    color: rgb(0 0 0 / 70%);
+  }
+
+  .product-periodic-charges__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .product-periodic-charges__item {
+    display: grid;
+    gap: 0.5rem;
+    padding: 1rem;
+    flex: 1 1 280px;
+    border-radius: 6px;
+    background: #fff;
+    box-shadow: inset 0 0 0 1px rgb(0 0 0 / 6%);
+  }
+
+  .product-periodic-charges__row {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .product-periodic-charges__label {
+    color: rgb(0 0 0 / 64%);
+    font-weight: 600;
+  }
+
   table {
     width: 100%;
     margin-top: 3%;

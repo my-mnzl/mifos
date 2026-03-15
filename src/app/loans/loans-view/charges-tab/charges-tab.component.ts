@@ -37,8 +37,33 @@ import { GlobalConfiguration } from 'app/system/configurations/global-configurat
 import { TranslateService } from '@ngx-translate/core';
 import { CurrencyPipe } from '@angular/common';
 import { MatTooltip } from '@angular/material/tooltip';
+import { catchError, map, of } from 'rxjs';
 import { DateFormatPipe } from '../../../pipes/date-format.pipe';
 import { STANDALONE_SHARED_IMPORTS } from 'app/standalone-shared.module';
+import { formatPeriodicLoanChargeSummary, isPeriodicLoanChargeTime } from 'app/core/utils/charge-time-type';
+import { ProductsService } from 'app/products/products.service';
+
+interface ProductPeriodicChargeView {
+  id: number | string;
+  name: string;
+  amount?: number;
+  currency?: {
+    code?: string;
+  };
+  chargeCalculationType?: {
+    value?: string;
+  };
+  chargeTimeType?: {
+    value?: string;
+  };
+  feeInterval?: number;
+  feeFrequency?: {
+    id?: number;
+    code?: string;
+    value?: string;
+  };
+  recurrenceSummary: string;
+}
 
 @Component({
   selector: 'mifosx-charges-tab',
@@ -73,11 +98,14 @@ export class ChargesTabComponent implements OnInit {
   dialog = inject(MatDialog);
   private settingsService = inject(SettingsService);
   private systemService = inject(SystemService);
+  private productsService = inject(ProductsService);
 
   /** Loan Details Data */
   loanDetails: any;
   /** Charges Data */
   chargesData: any;
+  /** Product periodic charges data. */
+  productPeriodicCharges: ProductPeriodicChargeView[] = [];
   /** Status */
   status: any;
   /** Columns to be displayed in charges table. */
@@ -118,7 +146,7 @@ export class ChargesTabComponent implements OnInit {
     this.systemService.getConfigurationByName('charge-accrual-date').subscribe((config: GlobalConfiguration) => {
       this.useDueDate = config.stringValue === 'due-date';
     });
-    this.chargesData = this.loanDetails.charges;
+    this.chargesData = Array.isArray(this.loanDetails?.charges) ? [...this.loanDetails.charges] : [];
     this.status = this.loanDetails.status.value;
     let actionFlag;
     this.chargesData.forEach((element: any) => {
@@ -141,6 +169,7 @@ export class ChargesTabComponent implements OnInit {
     this.dataSource = new MatTableDataSource(this.chargesData);
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
+    this.loadProductPeriodicCharges();
   }
 
   /**
@@ -286,5 +315,36 @@ export class ChargesTabComponent implements OnInit {
     this.router
       .navigateByUrl(`/clients/${clientId}/loans-accounts`, { skipLocationChange: true })
       .then(() => this.router.navigate([url]));
+  }
+
+  productChargeCurrencyCode(charge: ProductPeriodicChargeView): string {
+    return charge.currency?.code ?? this.loanDetails?.currency?.code ?? 'USD';
+  }
+
+  private loadProductPeriodicCharges() {
+    const loanProductId = this.loanDetails?.loanProductId ?? this.loanDetails?.productId;
+    if (!loanProductId) {
+      this.productPeriodicCharges = [];
+      return;
+    }
+
+    this.productsService
+      .getLoanProduct(String(loanProductId))
+      .pipe(
+        map((loanProduct: any) =>
+          (loanProduct?.charges ?? [])
+            .filter((charge: any) => isPeriodicLoanChargeTime(charge?.chargeTimeType))
+            .map(
+              (charge: any): ProductPeriodicChargeView => ({
+                ...charge,
+                recurrenceSummary: formatPeriodicLoanChargeSummary(charge)
+              })
+            )
+        ),
+        catchError(() => of([]))
+      )
+      .subscribe((productPeriodicCharges) => {
+        this.productPeriodicCharges = productPeriodicCharges;
+      });
   }
 }
