@@ -8,6 +8,7 @@ import { map } from 'rxjs/operators';
 import { Dates } from 'app/core/utils/dates';
 import { SettingsService } from 'app/settings/settings.service';
 import { DisbursementData } from './models/loan-account.model';
+import { isPeriodicLoanChargeTime } from 'app/core/utils/charge-time-type';
 
 interface StandingInstructionsResponse {
   pageItems: any[];
@@ -701,7 +702,7 @@ export class LoansService {
   ): any {
     const loansAccountData = {
       ...loansAccount,
-      charges: (loansAccount.charges ?? [])
+      charges: this.filterManualLoanCharges(loansAccount.charges ?? [])
         .map((charge: any) => {
           const chargeId = charge.chargeId ?? charge.id;
           if (chargeId == null) {
@@ -788,6 +789,10 @@ export class LoansService {
     loansAccountData.allowPartialPeriodInterestCalcualtion = loansAccountData.allowPartialPeriodInterestCalculation;
     delete loansAccountData.allowPartialPeriodInterestCalculation;
     return loansAccountData;
+  }
+
+  filterManualLoanCharges<T extends { chargeTimeType?: any }>(charges: T[] = []): T[] {
+    return (charges ?? []).filter((charge) => !!charge && !isPeriodicLoanChargeTime(charge.chargeTimeType));
   }
 
   saveLoanDisbursementDetailsData(disbursementData: DisbursementData[]): void {

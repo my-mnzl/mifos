@@ -183,7 +183,8 @@ export class CreateGlimAccountComponent {
     // const monthDayFormat = 'dd MMMM';
     const data = {
       ...this.loansAccount,
-      charges: (this.loansAccount.charges ?? [])
+      charges: this.loansService
+        .filterManualLoanCharges(this.loansAccount.charges ?? [])
         .map((charge: any) => {
           const chargeId = charge.chargeId ?? charge.id;
           if (chargeId == null) {

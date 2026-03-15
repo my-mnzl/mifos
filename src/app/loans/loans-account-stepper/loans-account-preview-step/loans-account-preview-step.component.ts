@@ -24,6 +24,14 @@ import { DateFormatPipe } from '../../../pipes/date-format.pipe';
 import { FormatNumberPipe } from '../../../pipes/format-number.pipe';
 import { YesnoPipe } from '../../../pipes/yesno.pipe';
 import { STANDALONE_SHARED_IMPORTS } from 'app/standalone-shared.module';
+import {
+  formatPeriodicLoanChargeSummary,
+  isAnnualFeeChargeTime,
+  isMonthlyFeeChargeTime,
+  isPeriodicLoanChargeTime,
+  isSpecifiedDueDateChargeTime,
+  isWeeklyFeeChargeTime
+} from 'app/core/utils/charge-time-type';
 
 /**
  * Create Loans Account Preview Step
@@ -117,5 +125,25 @@ export class LoansAccountPreviewStepComponent implements OnChanges {
         .filter((member: any) => member.selected)
         .reduce((acc: number, member: any) => acc + (member.principal ?? 0), 0);
     }
+  }
+
+  showsDueDate(charge: any): boolean {
+    return (
+      isSpecifiedDueDateChargeTime(charge?.chargeTimeType) ||
+      isWeeklyFeeChargeTime(charge?.chargeTimeType) ||
+      (isPeriodicLoanChargeTime(charge?.chargeTimeType) && !!charge?.dueDate)
+    );
+  }
+
+  showsFeeOnMonthDay(charge: any): boolean {
+    return isMonthlyFeeChargeTime(charge?.chargeTimeType) || isAnnualFeeChargeTime(charge?.chargeTimeType);
+  }
+
+  showsPeriodicSummary(charge: any): boolean {
+    return isPeriodicLoanChargeTime(charge?.chargeTimeType) && !charge?.dueDate;
+  }
+
+  getPeriodicChargeSummary(charge: any): string {
+    return formatPeriodicLoanChargeSummary(charge);
   }
 }

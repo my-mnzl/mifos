@@ -20,6 +20,16 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { ValidateOnFocusDirective } from '../../../directives/validate-on-focus.directive';
 import { GlAccountSelectorComponent } from '../../../shared/accounting/gl-account-selector/gl-account-selector.component';
 import { STANDALONE_SHARED_IMPORTS } from 'app/standalone-shared.module';
+import {
+  filterPeriodicFeeFrequencyOptions,
+  isAnnualFeeChargeTime,
+  isMonthlyFeeChargeTime,
+  isOverdueInstallmentChargeTime,
+  isPeriodicLoanChargeTime,
+  isTrancheDisbursementChargeTime,
+  isWeeklyFeeChargeTime,
+  resolveChargeTimeTypeOption
+} from 'app/core/utils/charge-time-type';
 
 /**
  * Create charge component.
@@ -170,25 +180,21 @@ export class CreateChargeComponent implements OnInit {
    * @returns {any} Filtered charge calculation type data.
    */
   filteredChargeCalculationType(): any {
+    const chargeTimeType = this.getSelectedChargeTimeTypeOption();
+
     return this.chargeCalculationTypeData.filter((chargeCalculationType: any) => {
       if (
-        this.chargeForm.get('chargeTimeType').value === 12 &&
+        isTrancheDisbursementChargeTime(chargeTimeType) &&
         (chargeCalculationType.id === 3 || chargeCalculationType.id === 4)
       ) {
         return false;
       }
-      if (this.chargeForm.get('chargeTimeType').value !== 12 && chargeCalculationType.id === 5) {
+      if (!isTrancheDisbursementChargeTime(chargeTimeType) && chargeCalculationType.id === 5) {
         return false;
       }
       if (this.chargeForm.get('chargeAppliesTo').value === 2) {
-        if (
-          !(
-            this.chargeForm.get('chargeTimeType').value === 5 ||
-            this.chargeForm.get('chargeTimeType').value === 16 ||
-            this.chargeForm.get('chargeTimeType').value === 17
-          ) &&
-          chargeCalculationType.id === 2
-        ) {
+        const selectedChargeTimeTypeId = this.chargeForm.get('chargeTimeType').value;
+        if (!(selectedChargeTimeTypeId === 5 || selectedChargeTimeTypeId === 16) && chargeCalculationType.id === 2) {
           return false;
         }
       }
@@ -250,55 +256,74 @@ export class CreateChargeComponent implements OnInit {
       this.chargeForm.removeControl('feeInterval');
       this.chargeForm.removeControl('feeOnMonthDay');
       this.chargeForm.removeControl('addFeeFrequency');
+      this.repeatEveryLabel = '';
       if (this.chargeForm.get('chargeAppliesTo').value !== 4) {
         this.chargeForm.get('penalty').enable();
       }
-      switch (chargeTimeType) {
-        case 6: // Annual Fee
-          this.chargeForm.addControl('feeOnMonthDay', new UntypedFormControl('', Validators.required));
-          break;
-        case 7: // Monthly Fee
-          this.chargeForm.addControl('feeOnMonthDay', new UntypedFormControl(''));
-          this.chargeForm.addControl(
-            'feeInterval',
-            new UntypedFormControl('', [
-              Validators.required,
-              Validators.min(1),
-              Validators.max(12),
-              Validators.pattern('^[1-9]\\d*$')
-            ])
-          );
-          this.repeatEveryLabel = 'Months';
-          break;
-        case 9: // Overdue Fee
-          this.chargeForm.get('penalty').setValue(true);
-          this.chargeForm.addControl('addFeeFrequency', new UntypedFormControl(false));
-          this.chargeForm.get('addFeeFrequency').valueChanges.subscribe((addFeeFrequency) => {
-            if (addFeeFrequency) {
-              this.chargeForm.addControl('feeFrequency', new UntypedFormControl('', Validators.required));
-              this.chargeForm.addControl(
-                'feeInterval',
-                new UntypedFormControl('', [
-                  Validators.required,
-                  Validators.pattern('^[1-9]\\d*$')
-                ])
-              );
-            } else {
-              this.chargeForm.removeControl('feeFrequency');
-              this.chargeForm.removeControl('feeInterval');
-            }
-          });
-          break;
-        case 11: // Weekly Fee
-          this.chargeForm.addControl(
-            'feeInterval',
-            new UntypedFormControl('', [
-              Validators.required,
-              Validators.pattern('^[1-9]\\d*$')
-            ])
-          );
-          this.repeatEveryLabel = 'Weeks';
-          break;
+      const selectedChargeTimeType = this.getChargeTimeTypeOption(chargeTimeType);
+
+      if (isAnnualFeeChargeTime(selectedChargeTimeType)) {
+        this.chargeForm.addControl('feeOnMonthDay', new UntypedFormControl('', Validators.required));
+        return;
+      }
+
+      if (isMonthlyFeeChargeTime(selectedChargeTimeType)) {
+        this.chargeForm.addControl('feeOnMonthDay', new UntypedFormControl(''));
+        this.chargeForm.addControl(
+          'feeInterval',
+          new UntypedFormControl('', [
+            Validators.required,
+            Validators.min(1),
+            Validators.max(12),
+            Validators.pattern('^[1-9]\\d*$')
+          ])
+        );
+        this.repeatEveryLabel = 'Months';
+        return;
+      }
+
+      if (isOverdueInstallmentChargeTime(selectedChargeTimeType)) {
+        this.chargeForm.get('penalty').setValue(true);
+        this.chargeForm.addControl('addFeeFrequency', new UntypedFormControl(false));
+        this.chargeForm.get('addFeeFrequency').valueChanges.subscribe((addFeeFrequency) => {
+          if (addFeeFrequency) {
+            this.chargeForm.addControl('feeFrequency', new UntypedFormControl('', Validators.required));
+            this.chargeForm.addControl(
+              'feeInterval',
+              new UntypedFormControl('', [
+                Validators.required,
+                Validators.pattern('^[1-9]\\d*$')
+              ])
+            );
+          } else {
+            this.chargeForm.removeControl('feeFrequency');
+            this.chargeForm.removeControl('feeInterval');
+          }
+        });
+        return;
+      }
+
+      if (isPeriodicLoanChargeTime(selectedChargeTimeType)) {
+        this.chargeForm.addControl('feeFrequency', new UntypedFormControl('', Validators.required));
+        this.chargeForm.addControl(
+          'feeInterval',
+          new UntypedFormControl('', [
+            Validators.required,
+            Validators.pattern('^[1-9]\\d*$')
+          ])
+        );
+        return;
+      }
+
+      if (isWeeklyFeeChargeTime(selectedChargeTimeType)) {
+        this.chargeForm.addControl(
+          'feeInterval',
+          new UntypedFormControl('', [
+            Validators.required,
+            Validators.pattern('^[1-9]\\d*$')
+          ])
+        );
+        this.repeatEveryLabel = 'Weeks';
       }
     });
     this.chargeForm.get('currencyCode').valueChanges.subscribe((currencyCode) => {
@@ -338,5 +363,25 @@ export class CreateChargeComponent implements OnInit {
     this.productsService.createCharge(data).subscribe((response: any) => {
       this.router.navigate(['../'], { relativeTo: this.route });
     });
+  }
+
+  get periodicFeeFrequencyOptions(): any[] {
+    return filterPeriodicFeeFrequencyOptions(this.chargesTemplateData?.feeFrequencyOptions);
+  }
+
+  isOverdueChargeTimeSelected(): boolean {
+    return isOverdueInstallmentChargeTime(this.getSelectedChargeTimeTypeOption());
+  }
+
+  isPeriodicChargeTimeSelected(): boolean {
+    return isPeriodicLoanChargeTime(this.getSelectedChargeTimeTypeOption());
+  }
+
+  private getSelectedChargeTimeTypeOption() {
+    return this.getChargeTimeTypeOption(this.chargeForm.get('chargeTimeType').value);
+  }
+
+  private getChargeTimeTypeOption(chargeTimeTypeId: number | null | undefined) {
+    return resolveChargeTimeTypeOption(this.chargeTimeTypeData, chargeTimeTypeId);
   }
 }

@@ -130,7 +130,7 @@ export class EditLoansAccountComponent {
     const dateFormat = this.settingsService.dateFormat;
     const loanType = 'individual';
     const uniqueCharges = new Map<number | string, any>();
-    (this.loansAccount.charges ?? []).forEach((charge: any) => {
+    this.loansService.filterManualLoanCharges(this.loansAccount.charges ?? []).forEach((charge: any) => {
       const chargeId = charge.chargeId;
       if (chargeId == null) {
         return;

@@ -35,6 +35,14 @@ import { MatStepperPrevious, MatStepperNext } from '@angular/material/stepper';
 import { DateFormatPipe } from '../../../pipes/date-format.pipe';
 import { FormatNumberPipe } from '../../../pipes/format-number.pipe';
 import { STANDALONE_SHARED_IMPORTS } from 'app/standalone-shared.module';
+import {
+  formatPeriodicLoanChargeSummary,
+  isAnnualFeeChargeTime,
+  isMonthlyFeeChargeTime,
+  isPeriodicLoanChargeTime,
+  isSpecifiedDueDateChargeTime,
+  isWeeklyFeeChargeTime
+} from 'app/core/utils/charge-time-type';
 
 /**
  * Recurring Deposit Account Charges Step
@@ -260,17 +268,16 @@ export class LoansAccountChargesStepComponent implements OnInit, OnChanges {
         let newCharge: any;
         const dateFormat = this.settingsService.dateFormat;
         const date = this.dateUtils.formatDate(response.data.value.date, dateFormat);
-        switch (charge.chargeTimeType.value) {
-          case 'Specified due date':
-          case 'Weekly Fee':
-            newCharge = { ...charge, dueDate: date };
-            break;
-          case 'Annual Fee':
-            newCharge = { ...charge, feeOnMonthDay: date };
-            break;
+        if (isSpecifiedDueDateChargeTime(charge.chargeTimeType) || isWeeklyFeeChargeTime(charge.chargeTimeType)) {
+          newCharge = { ...charge, dueDate: date };
+        } else if (isAnnualFeeChargeTime(charge.chargeTimeType)) {
+          newCharge = { ...charge, feeOnMonthDay: date };
         }
-        this.chargesDataSource.splice(this.chargesDataSource.indexOf(charge), 1, newCharge);
-        this.chargesDataSource = this.chargesDataSource.concat([]);
+
+        if (newCharge) {
+          this.chargesDataSource.splice(this.chargesDataSource.indexOf(charge), 1, newCharge);
+          this.chargesDataSource = this.chargesDataSource.concat([]);
+        }
       }
     });
     this.pristine = false;
@@ -371,5 +378,33 @@ export class LoansAccountChargesStepComponent implements OnInit, OnChanges {
     const len = this.activeClientMembers.length;
     this.selectAllItems =
       len === 0 ? false : this.activeClientMembers.filter((item: any) => item.selected).length === len;
+  }
+
+  showsDueDate(charge: any): boolean {
+    return (
+      isSpecifiedDueDateChargeTime(charge?.chargeTimeType) ||
+      isWeeklyFeeChargeTime(charge?.chargeTimeType) ||
+      (isPeriodicLoanChargeTime(charge?.chargeTimeType) && !!charge?.dueDate)
+    );
+  }
+
+  showsFeeOnMonthDay(charge: any): boolean {
+    return isMonthlyFeeChargeTime(charge?.chargeTimeType) || isAnnualFeeChargeTime(charge?.chargeTimeType);
+  }
+
+  showsPeriodicSummary(charge: any): boolean {
+    return isPeriodicLoanChargeTime(charge?.chargeTimeType) && !charge?.dueDate;
+  }
+
+  canEditChargeDate(charge: any): boolean {
+    return (
+      isSpecifiedDueDateChargeTime(charge?.chargeTimeType) ||
+      isWeeklyFeeChargeTime(charge?.chargeTimeType) ||
+      isAnnualFeeChargeTime(charge?.chargeTimeType)
+    );
+  }
+
+  getPeriodicChargeSummary(charge: any): string {
+    return formatPeriodicLoanChargeSummary(charge);
   }
 }

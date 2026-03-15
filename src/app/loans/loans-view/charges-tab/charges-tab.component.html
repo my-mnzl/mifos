@@ -1,4 +1,42 @@
 <div class="tab-container">
+  @if (productPeriodicCharges.length) {
+    <section class="product-periodic-charges">
+      <h3>Product periodic charges</h3>
+      <p class="product-periodic-charges__description">
+        These charges are configured on the loan product and materialize on the loan when due.
+      </p>
+
+      <div class="product-periodic-charges__list">
+        @for (charge of productPeriodicCharges; track charge.id) {
+          <article class="product-periodic-charges__item">
+            <div class="product-periodic-charges__row">
+              <span class="product-periodic-charges__label">{{ 'labels.inputs.name' | translate }}</span>
+              <span>{{ charge.name }}</span>
+            </div>
+            <div class="product-periodic-charges__row">
+              <span class="product-periodic-charges__label">{{ 'labels.inputs.Payment due at' | translate }}</span>
+              <span>{{ charge.chargeTimeType?.value || 'Periodic Loan Charge' }}</span>
+            </div>
+            <div class="product-periodic-charges__row">
+              <span class="product-periodic-charges__label">Recurrence</span>
+              <span>{{ charge.recurrenceSummary }}</span>
+            </div>
+            <div class="product-periodic-charges__row">
+              <span class="product-periodic-charges__label">{{ 'labels.inputs.Calculation Type' | translate }}</span>
+              <span>{{ charge.chargeCalculationType?.value || 'N/A' }}</span>
+            </div>
+            <div class="product-periodic-charges__row">
+              <span class="product-periodic-charges__label">{{ 'labels.inputs.Amount' | translate }}</span>
+              <span>
+                {{ charge.amount | currency: productChargeCurrencyCode(charge) : 'symbol-narrow' : '1.2-2' }}
+              </span>
+            </div>
+          </article>
+        }
+      </div>
+    </section>
+  }
+
   <table mat-table [dataSource]="dataSource" matSort>
     <ng-container matColumnDef="name">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'labels.inputs.name' | translate }}</th>
