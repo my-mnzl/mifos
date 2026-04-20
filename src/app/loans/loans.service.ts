@@ -718,12 +718,6 @@ export class LoansService {
           if (charge.dueDate) {
             mappedCharge.dueDate = this.dateUtils.formatDate(charge.dueDate, dateFormat);
           }
-          if (charge.feeInterval !== undefined) {
-            mappedCharge.feeInterval = charge.feeInterval;
-          }
-          if (charge.feeOnMonthDay !== undefined) {
-            mappedCharge.feeOnMonthDay = charge.feeOnMonthDay;
-          }
           return mappedCharge;
         })
         .filter(Boolean),
@@ -792,7 +786,7 @@ export class LoansService {
   }
 
   filterManualLoanCharges<T extends { chargeTimeType?: any }>(charges: T[] = []): T[] {
-    return (charges ?? []).filter((charge) => !!charge && !isPeriodicLoanChargeTime(charge.chargeTimeType));
+    return (charges ?? []).filter((charge) => !!charge);
   }
 
   saveLoanDisbursementDetailsData(disbursementData: DisbursementData[]): void {
@@ -800,6 +794,6 @@ export class LoansService {
   }
 
   getLoanDisbursementDetailsData(): DisbursementData[] {
-    return JSON.parse(localStorage.getItem('disbursementData'));
+    return JSON.parse(localStorage.getItem('disbursementData') ?? '[]');
   }
 }

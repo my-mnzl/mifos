@@ -86,7 +86,7 @@ describe('LoansAccountChargesStepComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Every 1 year, starts on first repayment date');
   });
 
-  it('does not allow date editing for periodic loan charges', () => {
-    expect(component.canEditChargeDate(periodicCharge)).toBe(false);
+  it('allows date editing for periodic loan charges', () => {
+    expect(component.canEditChargeDate(periodicCharge)).toBe(true);
   });
 });

@@ -384,7 +384,7 @@ export class LoansAccountChargesStepComponent implements OnInit, OnChanges {
     return (
       isSpecifiedDueDateChargeTime(charge?.chargeTimeType) ||
       isWeeklyFeeChargeTime(charge?.chargeTimeType) ||
-      (isPeriodicLoanChargeTime(charge?.chargeTimeType) && !!charge?.dueDate)
+      isPeriodicLoanChargeTime(charge?.chargeTimeType)
     );
   }
 
@@ -400,7 +400,8 @@ export class LoansAccountChargesStepComponent implements OnInit, OnChanges {
     return (
       isSpecifiedDueDateChargeTime(charge?.chargeTimeType) ||
       isWeeklyFeeChargeTime(charge?.chargeTimeType) ||
-      isAnnualFeeChargeTime(charge?.chargeTimeType)
+      isAnnualFeeChargeTime(charge?.chargeTimeType) ||
+      isPeriodicLoanChargeTime(charge?.chargeTimeType)
     );
   }
 
