@@ -32,7 +32,7 @@ describe('LoansService', () => {
     service = TestBed.inject(LoansService);
   });
 
-  it('filters periodic loan charges out of manual loan charge submissions', () => {
+  it('forwards all manual loan charges including periodic charges', () => {
     const periodicCharge = {
       chargeId: 21,
       amount: 10,
@@ -57,10 +57,13 @@ describe('LoansService', () => {
         disbursementCharge,
         periodicCharge
       ])
-    ).toEqual([disbursementCharge]);
+    ).toEqual([
+      disbursementCharge,
+      periodicCharge
+    ]);
   });
 
-  it('omits periodic loan charges when building the loan request payload', () => {
+  it('forwards periodic loan charges when building the loan request payload', () => {
     const payload = service.buildLoanRequestPayload(
       {
         charges: [
@@ -77,6 +80,7 @@ describe('LoansService', () => {
           {
             chargeId: 21,
             amount: 10,
+            dueDate: '2026-04-15',
             chargeTimeType: {
               id: 17,
               code: 'chargeTimeType.loanPeriodic',
@@ -105,6 +109,11 @@ describe('LoansService', () => {
         chargeId: 13,
         amount: 1.99,
         dueDate: 'formatted:2026-03-20'
+      },
+      {
+        chargeId: 21,
+        amount: 10,
+        dueDate: 'formatted:2026-04-15'
       }
     ]);
   });

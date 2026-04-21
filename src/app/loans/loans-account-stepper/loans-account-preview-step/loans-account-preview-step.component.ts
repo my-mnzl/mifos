@@ -131,7 +131,7 @@ export class LoansAccountPreviewStepComponent implements OnChanges {
     return (
       isSpecifiedDueDateChargeTime(charge?.chargeTimeType) ||
       isWeeklyFeeChargeTime(charge?.chargeTimeType) ||
-      (isPeriodicLoanChargeTime(charge?.chargeTimeType) && !!charge?.dueDate)
+      isPeriodicLoanChargeTime(charge?.chargeTimeType)
     );
   }
 
