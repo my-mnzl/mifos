@@ -1,0 +1,135 @@
+<div class="ai-dialog">
+  <header class="ai-head">
+    <h2 class="ai-title" mat-dialog-title>{{ 'labels.heading.Auto-fill Holidays' | translate }}</h2>
+    <p class="ai-sub">
+      {{ 'labels.text.Egypt official holidays via Google Calendar' | translate }}
+    </p>
+  </header>
+
+  <mat-dialog-content class="ai-content">
+    <form [formGroup]="configForm" class="ai-config">
+      <div class="ai-row">
+        <mat-form-field appearance="outline" class="ai-year">
+          <mat-label>{{ 'labels.inputs.Year' | translate }}</mat-label>
+          <mat-select formControlName="year" (selectionChange)="fetch()">
+            @for (year of yearOptions; track year) {
+              <mat-option [value]="year">{{ year }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="ai-resched">
+          <mat-label>{{ 'labels.inputs.Repayments Scheduling Type' | translate }}</mat-label>
+          <mat-select formControlName="reschedulingType">
+            @for (opt of reschedulingOptions; track opt.id) {
+              <mat-option [value]="opt.id">{{ opt.value }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="ai-offices">
+        <div class="ai-label">{{ 'labels.inputs.Apply to offices' | translate }}</div>
+        <div class="ai-offices-list">
+          @for (office of data.offices; track office.id) {
+            <button
+              type="button"
+              class="ai-chip"
+              [class.is-on]="isOfficeSelected(office.id)"
+              (click)="toggleOffice(office.id)"
+            >
+              {{ office.name }}
+            </button>
+          }
+        </div>
+      </div>
+    </form>
+
+    <hr class="ai-rule" />
+
+    @if (loading) {
+      <div class="ai-state">
+        <p>{{ 'labels.text.Loading holidays' | translate }}</p>
+      </div>
+    } @else if (errorMessage && !importResult) {
+      <div class="ai-state ai-state-error">
+        <p>{{ errorMessage }}</p>
+        <button mat-stroked-button (click)="fetch()">{{ 'labels.buttons.Retry' | translate }}</button>
+      </div>
+    } @else if (importResult) {
+      <div class="ai-state ai-state-success">
+        <p class="ai-success-line">
+          <span class="ai-success-num">{{ importResult.success }}</span>
+          {{ 'labels.text.holidays imported' | translate }}
+        </p>
+        @if (importResult.failed > 0) {
+          <p class="ai-failed">{{ importResult.failed }} {{ 'labels.text.failed to import' | translate }}</p>
+        }
+      </div>
+    } @else if (importing) {
+      <div class="ai-state">
+        <p>{{ 'labels.text.Importing' | translate }} {{ importProgress.done }} / {{ importProgress.total }}</p>
+        <mat-progress-bar mode="determinate" [value]="importPercent" class="ai-progress"></mat-progress-bar>
+      </div>
+    } @else {
+      <div class="ai-preview-head">
+        <label class="ai-select-all">
+          <mat-checkbox
+            [checked]="allSelected"
+            [indeterminate]="someSelected"
+            (change)="toggleAll($event.checked)"
+          ></mat-checkbox>
+          <span>{{ selectedCount }} / {{ preview.length }} {{ 'labels.text.selected' | translate }}</span>
+        </label>
+      </div>
+
+      <ul class="ai-list">
+        @for (row of preview; track row.uid || row.summary) {
+          <li class="ai-item" [class.is-on]="row.selected" (click)="toggleRow(row)">
+            <mat-checkbox
+              [checked]="row.selected"
+              (click)="$event.stopPropagation()"
+              (change)="toggleRow(row)"
+            ></mat-checkbox>
+            <div class="ai-item-info">
+              <div class="ai-item-name">{{ row.summary }}</div>
+              <div class="ai-item-dates">
+                <span>{{ row.start | date: 'mediumDate' }}</span>
+                @if (row.end.getTime() !== row.start.getTime()) {
+                  <span class="ai-arrow">→</span>
+                  <span>{{ row.end | date: 'mediumDate' }}</span>
+                }
+              </div>
+            </div>
+          </li>
+        }
+      </ul>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="ai-actions">
+    @if (importResult) {
+      <button mat-flat-button color="primary" (click)="finish()">
+        {{ 'labels.buttons.Done' | translate }}
+      </button>
+    } @else {
+      <button mat-button (click)="cancel()" [disabled]="importing">
+        {{ 'labels.buttons.Cancel' | translate }}
+      </button>
+      <button
+        mat-flat-button
+        color="primary"
+        (click)="confirm()"
+        [disabled]="
+          loading ||
+          importing ||
+          selectedCount === 0 ||
+          configForm.invalid ||
+          (configForm.value.offices?.length ?? 0) === 0
+        "
+      >
+        {{ 'labels.buttons.Import' | translate }} ({{ selectedCount }})
+      </button>
+    }
+  </mat-dialog-actions>
+</div>

@@ -1,69 +1,184 @@
-<div class="container m-b-20 layout-row align-end gap-20px">
-  <div #buttonCreateHoliday class="in-block">
-    <button mat-raised-button color="primary" [routerLink]="['create']" *mifosxHasPermission="'CREATE_HOLIDAY'">
-      <fa-icon icon="plus" class="m-r-10"></fa-icon>
-      {{ 'labels.buttons.Create Holiday' | translate }}
-    </button>
-  </div>
-</div>
-
-<div class="container">
-  <div #filterRef class="layout-row gap-20px">
-    <mat-form-field class="flex-fill">
-      <mat-label>{{ 'labels.inputs.Filter' | translate }}</mat-label>
-      <input matInput (keyup)="applyFilter($event.target.value)" />
-    </mat-form-field>
-    <mat-form-field>
-      <mat-label> {{ 'labels.inputs.Select Office' | translate }} </mat-label>
-      <mat-select [formControl]="officeSelector">
-        @for (office of officeData; track office) {
-          <mat-option [value]="office.id">
-            {{ office.name }}
-          </mat-option>
+<div class="hl-page">
+  <header class="hl-page-head">
+    <div class="hl-page-titlewrap">
+      <h1 class="hl-page-title">{{ 'labels.heading.Holidays' | translate }}</h1>
+      <p class="hl-page-meta">
+        @if (officeSelector.value) {
+          <span>{{ totalCount }} {{ totalCount === 1 ? 'holiday' : 'holidays' }}</span>
+          <span class="hl-meta-dot">·</span>
+          <span>{{ activeCount }} {{ 'labels.heading.Active' | translate | lowercase }}</span>
+          <span class="hl-meta-dot">·</span>
+          <span>{{ upcomingCount }} {{ 'labels.heading.Upcoming' | translate | lowercase }}</span>
+        } @else {
+          <span class="hl-meta-muted">{{ 'labels.text.Select an office to view holidays' | translate }}</span>
         }
-      </mat-select>
-    </mat-form-field>
-  </div>
+      </p>
+    </div>
 
-  <div class="mat-elevation-z8" [hidden]="!officeSelector.value">
-    <table mat-table [dataSource]="dataSource" matSort>
-      <ng-container matColumnDef="name">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'labels.inputs.Holiday Name' | translate }}</th>
-        <td mat-cell *matCellDef="let holidays">{{ holidays.name }}</td>
-      </ng-container>
+    <div class="hl-page-actions">
+      <mat-form-field appearance="outline" class="hl-office-select">
+        <mat-label>{{ 'labels.inputs.Select Office' | translate }}</mat-label>
+        <mat-select [formControl]="officeSelector">
+          @for (office of officeData; track office.id) {
+            <mat-option [value]="office.id">
+              {{ office.name }}
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
 
-      <ng-container matColumnDef="fromDate">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'labels.inputs.Start Date' | translate }}</th>
-        <td mat-cell *matCellDef="let holidays">{{ holidays.fromDate | dateFormat }}</td>
-      </ng-container>
+      <button type="button" class="hl-link-btn" (click)="openAutoImport()" *mifosxHasPermission="'CREATE_HOLIDAY'">
+        <fa-icon icon="cloud-download-alt"></fa-icon>
+        {{ 'labels.buttons.Auto-fill from Google' | translate }}
+      </button>
 
-      <ng-container matColumnDef="toDate">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'labels.inputs.End Date' | translate }}</th>
-        <td mat-cell *matCellDef="let holidays">{{ holidays.toDate | dateFormat }}</td>
-      </ng-container>
+      <a
+        mat-flat-button
+        color="primary"
+        class="hl-create-btn"
+        [routerLink]="['create']"
+        *mifosxHasPermission="'CREATE_HOLIDAY'"
+      >
+        <fa-icon icon="plus" class="m-r-10"></fa-icon>
+        {{ 'labels.buttons.Create Holiday' | translate }}
+      </a>
+    </div>
+  </header>
 
-      <ng-container matColumnDef="repaymentsRescheduledTo">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>
-          {{ 'labels.inputs.Repayments Scheduled To' | translate }}
-        </th>
-        <td mat-cell *matCellDef="let holidays">
-          {{
-            holidays.reschedulingType === 1 ? 'Next Repayment Date' : (holidays.repaymentsRescheduledTo | dateFormat)
-          }}
-        </td>
-      </ng-container>
+  @if (officeSelector.value) {
+    <div class="hl-tabs" role="tablist">
+      <button type="button" role="tab" class="hl-tab" [class.is-active]="view === 'month'" (click)="setView('month')">
+        <fa-icon icon="calendar-alt"></fa-icon>
+        {{ 'labels.inputs.Month' | translate }}
+      </button>
+      <button type="button" role="tab" class="hl-tab" [class.is-active]="view === 'list'" (click)="setView('list')">
+        <fa-icon icon="list"></fa-icon>
+        {{ 'labels.inputs.List' | translate }}
+      </button>
 
-      <ng-container matColumnDef="status">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'labels.inputs.Status' | translate }}</th>
-        <td mat-cell *matCellDef="let holidays">{{ holidays.status.value }}</td>
-      </ng-container>
+      @if (view === 'list') {
+        <input
+          type="text"
+          class="hl-list-filter"
+          [placeholder]="'labels.inputs.Filter' | translate"
+          [formControl]="filterControl"
+        />
+      }
+    </div>
 
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns" class="select-row" [routerLink]="[row.id]"></tr>
-    </table>
+    @if (view === 'month') {
+      <mifosx-holiday-calendar
+        [holidays]="holidaysData"
+        [month]="currentMonth"
+        [weekStartsOn]="weekStartsOn"
+        (monthChange)="currentMonth = $event"
+      ></mifosx-holiday-calendar>
+    } @else {
+      @if (filteredHolidays.length === 0) {
+        <div class="hl-empty">
+          @if (filterControl.value) {
+            <p>{{ 'labels.text.No holidays match your filter' | translate }}</p>
+          } @else {
+            <p>{{ 'labels.text.No holidays defined' | translate }}</p>
+          }
+        </div>
+      } @else {
+        <div class="hl-bulkbar" [class.is-active]="selectedIds.size > 0">
+          <label class="hl-bulkbar-select">
+            <mat-checkbox
+              [checked]="allSelected"
+              [indeterminate]="someSelected"
+              (change)="toggleSelectAll($event.checked)"
+            ></mat-checkbox>
+            @if (selectedIds.size > 0) {
+              <span>{{ selectedIds.size }} {{ 'labels.text.selected' | translate }}</span>
+            } @else {
+              <span class="hl-bulkbar-hint">{{ 'labels.text.Select to activate or delete' | translate }}</span>
+            }
+          </label>
 
-    <mat-paginator [pageSizeOptions]="[10, 25, 50, 100]" showFirstLastButtons></mat-paginator>
-  </div>
+          @if (selectedIds.size > 0) {
+            <div class="hl-bulkbar-actions">
+              @if (activating) {
+                <span class="hl-bulkbar-progress">
+                  {{ activationProgress.done }} / {{ activationProgress.total }}
+                </span>
+              } @else {
+                <button type="button" class="hl-link-btn-muted" (click)="clearSelection()">
+                  {{ 'labels.buttons.Clear' | translate }}
+                </button>
+                @if (selectedPendingCount > 0) {
+                  <button
+                    mat-flat-button
+                    color="primary"
+                    class="hl-bulkbar-btn"
+                    (click)="activateSelected()"
+                    *mifosxHasPermission="'ACTIVATE_HOLIDAY'"
+                  >
+                    {{ 'labels.buttons.Activate' | translate }} ({{ selectedPendingCount }})
+                  </button>
+                }
+                <button
+                  mat-stroked-button
+                  class="hl-bulkbar-btn hl-bulkbar-btn-danger"
+                  (click)="deleteSelected()"
+                  *mifosxHasPermission="'DELETE_HOLIDAY'"
+                >
+                  {{ 'labels.buttons.Delete' | translate }} ({{ selectedIds.size }})
+                </button>
+              }
+            </div>
+          }
+        </div>
+        <div class="hl-list">
+          @for (group of groupedHolidays; track group.label) {
+            <div class="hl-list-group">
+              <div class="hl-list-group-head">{{ group.label }}</div>
+              @for (h of group.items; track h.id) {
+                <div class="hl-row" [class.is-selected]="isSelected(h.id)">
+                  <mat-checkbox
+                    class="hl-row-check"
+                    [checked]="isSelected(h.id)"
+                    (change)="toggleSelect(h.id)"
+                    (click)="$event.stopPropagation()"
+                  ></mat-checkbox>
+                  <a class="hl-row-body" [routerLink]="[h.id]">
+                    <div class="hl-row-date">
+                      <span class="hl-row-day">{{ formatDay(h.fromDate) }}</span>
+                      <span class="hl-row-mon">{{ formatMonth(h.fromDate) }}</span>
+                    </div>
+                    <div class="hl-row-info">
+                      <div class="hl-row-name">{{ h.name }}</div>
+                      <div class="hl-row-sub">
+                        <span>{{ formatRange(h.fromDate, h.toDate) }}</span>
+                        @if (h.reschedulingType === 1) {
+                          <span class="hl-meta-dot">·</span>
+                          <span>{{ 'labels.inputs.Repayments Scheduled To' | translate }}: next repayment date</span>
+                        } @else if (h.repaymentsRescheduledTo) {
+                          <span class="hl-meta-dot">·</span>
+                          <span
+                            >{{ 'labels.inputs.Repayments Scheduled To' | translate }}:
+                            {{ h.repaymentsRescheduledTo | dateFormat }}</span
+                          >
+                        }
+                      </div>
+                    </div>
+                    <span class="hl-row-status" [ngClass]="statusChipClass(h.status?.value)">
+                      {{ h.status?.value }}
+                    </span>
+                  </a>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+    }
+  } @else {
+    <div class="hl-empty hl-empty-large">
+      <p>{{ 'labels.text.Select an office to view holidays' | translate }}</p>
+    </div>
+  }
 </div>
 
 <ng-template #templateButtonCreateHoliday let-popover="popover">

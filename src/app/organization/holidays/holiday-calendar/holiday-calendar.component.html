@@ -1,0 +1,76 @@
+<div class="cal">
+  <div class="cal-toolbar">
+    <div class="cal-nav">
+      <button
+        type="button"
+        class="cal-nav-btn"
+        (click)="prevMonth()"
+        [attr.aria-label]="'labels.buttons.Previous month' | translate"
+      >
+        <fa-icon icon="chevron-left"></fa-icon>
+      </button>
+      <h2 class="cal-month">{{ monthLabel }}</h2>
+      <button
+        type="button"
+        class="cal-nav-btn"
+        (click)="nextMonth()"
+        [attr.aria-label]="'labels.buttons.Next month' | translate"
+      >
+        <fa-icon icon="chevron-right"></fa-icon>
+      </button>
+    </div>
+    <button type="button" class="cal-today" (click)="goToday()">
+      {{ 'labels.buttons.Today' | translate }}
+    </button>
+  </div>
+
+  <div class="cal-weekdays">
+    @for (label of weekDayLabels; track label) {
+      <div class="cal-weekday">{{ label }}</div>
+    }
+  </div>
+
+  <div class="cal-grid">
+    @for (week of weeks; track trackWeek($index, week)) {
+      <div class="cal-week" [style.--lanes]="week.laneCount">
+        @for (day of week.days; track trackDay($index, day); let dayIdx = $index) {
+          <button
+            type="button"
+            class="cal-day"
+            [class.is-out]="!day.inMonth"
+            [class.is-today]="day.isToday"
+            [class.is-weekend]="day.isWeekend"
+            [style.grid-column]="dayIdx + 1"
+            (click)="dayClick.emit(day.date)"
+          >
+            <span class="cal-day-num">{{ day.date.getDate() }}</span>
+          </button>
+        }
+
+        @for (bar of week.bars; track trackBar($index, bar)) {
+          @if (bar.lane < maxVisibleLanes) {
+            <button
+              type="button"
+              class="cal-bar"
+              [class.is-start]="bar.startsHere"
+              [class.is-end]="bar.endsHere"
+              [style.grid-column]="bar.startCol + 1 + ' / ' + (bar.endCol + 2)"
+              [style.grid-row]="bar.lane + 2"
+              [style.--hue]="bar.hue"
+              [title]="bar.holiday.name"
+              (click)="openHoliday(bar.holiday, $event)"
+            >
+              <span class="cal-bar-text">{{ bar.holiday.name }}</span>
+            </button>
+          }
+        }
+
+        @if (week.laneCount > maxVisibleLanes) {
+          <div class="cal-overflow" [style.grid-row]="maxVisibleLanes + 2">
+            +{{ week.laneCount - maxVisibleLanes }} more
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>
