@@ -1,0 +1,249 @@
+:host {
+  display: block;
+
+  --ai-border: rgb(15 23 42 / 8%);
+  --ai-text: rgb(15 23 42 / 92%);
+  --ai-text-mid: rgb(15 23 42 / 65%);
+  --ai-text-dim: rgb(15 23 42 / 45%);
+  --ai-accent: #1074b9;
+}
+
+.ai-dialog {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- Header ---------- */
+.ai-head {
+  padding: 4px 4px 14px;
+  border-bottom: 1px solid var(--ai-border);
+}
+
+.ai-title {
+  margin: 0 !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em;
+  color: var(--ai-text) !important;
+}
+
+.ai-sub {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--ai-text-mid);
+}
+
+/* ---------- Content ---------- */
+.ai-content {
+  padding: 18px 4px !important;
+  max-height: 65vh;
+}
+
+.ai-config {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ai-row {
+  display: flex;
+  gap: 12px;
+}
+
+.ai-year {
+  flex: 0 1 160px;
+}
+
+.ai-resched {
+  flex: 1 1 auto;
+}
+
+.ai-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ai-text-dim);
+  margin-bottom: 8px;
+}
+
+/* ---------- Office chips ---------- */
+.ai-offices-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ai-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--ai-border);
+  background: transparent;
+  color: var(--ai-text-mid);
+  font-size: 12.5px;
+  font-family: inherit;
+  cursor: pointer;
+  transition:
+    border-color 0.12s ease,
+    background 0.12s ease,
+    color 0.12s ease;
+}
+
+.ai-chip:hover {
+  border-color: rgb(15 23 42 / 24%);
+  color: var(--ai-text);
+}
+
+.ai-chip.is-on {
+  background: var(--ai-accent);
+  border-color: var(--ai-accent);
+  color: #fff;
+}
+
+.ai-rule {
+  border: none;
+  border-top: 1px solid var(--ai-border);
+  margin: 18px 0 16px;
+}
+
+/* ---------- States ---------- */
+.ai-state {
+  padding: 28px 8px;
+  text-align: center;
+  color: var(--ai-text-mid);
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: center;
+}
+
+.ai-state p {
+  margin: 0;
+}
+
+.ai-state-error {
+  color: #b91c1c;
+}
+
+.ai-state-success {
+  color: var(--ai-text);
+}
+
+.ai-success-num {
+  color: #2e7d32;
+  font-weight: 600;
+  font-size: 22px;
+  margin-right: 4px;
+}
+
+.ai-success-line {
+  font-size: 16px;
+}
+
+.ai-failed {
+  color: #b45309;
+  font-size: 13px;
+}
+
+.ai-progress {
+  width: 220px;
+}
+
+/* ---------- Preview list ---------- */
+.ai-preview-head {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+
+.ai-select-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--ai-text-mid);
+  cursor: pointer;
+}
+
+.ai-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  max-height: 280px;
+  overflow-y: auto;
+  border-top: 1px solid var(--ai-border);
+}
+
+.ai-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 8px;
+  border-bottom: 1px solid var(--ai-border);
+  cursor: pointer;
+  transition: background 0.1s ease;
+}
+
+.ai-item:hover {
+  background: rgb(16 116 185 / 4%);
+}
+
+.ai-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.ai-item-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ai-text-mid);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ai-item.is-on .ai-item-name {
+  color: var(--ai-text);
+}
+
+.ai-item-dates {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ai-text-dim);
+  font-size: 12px;
+  font-feature-settings: 'tnum';
+}
+
+.ai-arrow {
+  opacity: 0.5;
+}
+
+/* ---------- Actions ---------- */
+.ai-actions {
+  padding: 12px 4px 4px !important;
+  gap: 8px;
+  justify-content: flex-end;
+  border-top: 1px solid var(--ai-border);
+}
+
+/* ---------- Dark mode ---------- */
+:host-context(.dark-mode),
+:host-context([data-theme='dark']) {
+  --ai-border: rgb(255 255 255 / 8%);
+  --ai-text: rgb(255 255 255 / 92%);
+  --ai-text-mid: rgb(255 255 255 / 65%);
+  --ai-text-dim: rgb(255 255 255 / 45%);
+}
+
+:host-context(.dark-mode) .ai-item:hover,
+:host-context([data-theme='dark']) .ai-item:hover {
+  background: rgb(91 162 236 / 8%);
+}

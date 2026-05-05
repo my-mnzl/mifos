@@ -1,51 +1,85 @@
-<div class="container">
-  <mat-card>
-    <form [formGroup]="workingDaysForm" (ngSubmit)="submit()">
-      <mat-card-content>
-        <div #workingDaysFormRef class="layout-column">
-          <div class="layout-row responsive-column">
-            <mat-label class="mat-h4 flex-50">{{ 'labels.inputs.Working Days' | translate }}</mat-label>
-            <div class="flex-50 layout-column" formArrayName="recurrence">
-              @for (day of recurrence.controls; track day; let i = $index) {
-                <div>
-                  <mat-checkbox labelPosition="after" [formControlName]="i">
-                    {{ weekDays[i].name }}
-                  </mat-checkbox>
-                </div>
-              }
-            </div>
-          </div>
+<div class="wd-page">
+  <header class="wd-page-head">
+    <div>
+      <h1 class="wd-page-title">{{ 'labels.heading.Working Days' | translate }}</h1>
+      <p class="wd-page-meta">
+        <span>{{ activeDayCount }}</span>
+        <span class="wd-meta-sep">/</span>
+        <span>7 days</span>
+        <span class="wd-meta-dot">·</span>
+        <span class="wd-meta-list">{{ activeDayList }}</span>
+      </p>
+    </div>
+  </header>
 
-          <mat-form-field>
-            <mat-label>{{ 'labels.inputs.Payments due on non working days' | translate }}</mat-label>
-            <mat-select formControlName="repaymentRescheduleType">
-              @for (repaymentRescheduleType of repaymentRescheduleTypeData; track repaymentRescheduleType) {
-                <mat-option [value]="repaymentRescheduleType.id">
-                  {{ repaymentRescheduleType.value }}
-                </mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
+  <form [formGroup]="workingDaysForm" (ngSubmit)="submit()" class="wd-form">
+    <section #workingDaysFormRef class="wd-section">
+      <div class="wd-section-head">
+        <h2 class="wd-section-title">{{ 'labels.inputs.Working Days' | translate }}</h2>
+        <p class="wd-section-hint">{{ 'labels.text.Tap a day to toggle' | translate }}</p>
+      </div>
 
-          <mat-checkbox labelPosition="before" formControlName="extendTermForDailyRepayments">
-            {{ 'labels.inputs.Loans daily repayment schedule' | translate }}
-          </mat-checkbox>
-        </div>
-      </mat-card-content>
+      <div class="wd-pills" formArrayName="recurrence">
+        @for (day of recurrence.controls; track $index; let i = $index) {
+          <button
+            type="button"
+            class="wd-pill"
+            [class.is-active]="day.value"
+            [attr.aria-pressed]="!!day.value"
+            [attr.aria-label]="weekDays[i].name"
+            (click)="toggleDay(i)"
+          >
+            {{ weekDays[i].name.slice(0, 3) }}
+          </button>
+        }
+      </div>
+    </section>
 
-      <mat-card-actions class="layout-row align-center gap-5px responsive-column">
-        <button mat-raised-button [routerLink]="['../']">{{ 'labels.buttons.Cancel' | translate }}</button>
-        <button
-          mat-raised-button
-          color="primary"
-          [disabled]="workingDaysForm.pristine"
-          *mifosxHasPermission="'UPDATE_WORKINGDAYS'"
-        >
-          {{ 'labels.buttons.Submit' | translate }}
-        </button>
-      </mat-card-actions>
-    </form>
-  </mat-card>
+    <section class="wd-section">
+      <div class="wd-section-head">
+        <h2 class="wd-section-title">{{ 'labels.inputs.Payments due on non working days' | translate }}</h2>
+        <p class="wd-section-hint">
+          {{ 'labels.text.Configure how payments due on non-working days behave' | translate }}
+        </p>
+      </div>
+
+      <div class="wd-fields">
+        <mat-form-field appearance="outline" class="wd-field">
+          <mat-label>{{ 'labels.inputs.Payments due on non working days' | translate }}</mat-label>
+          <mat-select formControlName="repaymentRescheduleType">
+            @for (repaymentRescheduleType of repaymentRescheduleTypeData; track repaymentRescheduleType.id) {
+              <mat-option [value]="repaymentRescheduleType.id">
+                {{ repaymentRescheduleType.value }}
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <label class="wd-toggle">
+          <mat-checkbox formControlName="extendTermForDailyRepayments"></mat-checkbox>
+          <span>{{ 'labels.inputs.Loans daily repayment schedule' | translate }}</span>
+        </label>
+      </div>
+    </section>
+
+    <div class="wd-actions">
+      @if (workingDaysForm.pristine) {
+        <span class="wd-actions-hint">{{ 'labels.text.No changes to save' | translate }}</span>
+      }
+      <button mat-stroked-button type="button" [routerLink]="['../']">
+        {{ 'labels.buttons.Cancel' | translate }}
+      </button>
+      <button
+        mat-flat-button
+        color="primary"
+        type="submit"
+        [disabled]="workingDaysForm.pristine"
+        *mifosxHasPermission="'UPDATE_WORKINGDAYS'"
+      >
+        {{ 'labels.buttons.Submit' | translate }}
+      </button>
+    </div>
+  </form>
 </div>
 
 <ng-template #templateWorkingDaysFormRef let-data let-popover="popover">

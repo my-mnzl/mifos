@@ -1,3 +1,223 @@
-.container {
-  max-width: 37rem;
+:host {
+  display: block;
+}
+
+/* ---------- Page ---------- */
+.wd-page {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 48px 24px 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.wd-page-head {
+  border-bottom: 1px solid rgb(15 23 42 / 8%);
+  padding-bottom: 18px;
+}
+
+.wd-page-title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: rgb(15 23 42 / 92%);
+  font-feature-settings: 'ss01';
+}
+
+.wd-page-meta {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: rgb(15 23 42 / 55%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.wd-page-meta > span:first-child {
+  color: #1074b9;
+  font-weight: 600;
+}
+
+.wd-meta-sep {
+  opacity: 0.45;
+}
+
+.wd-meta-dot {
+  opacity: 0.4;
+  margin: 0 2px;
+}
+
+.wd-meta-list {
+  font-feature-settings: 'tnum';
+}
+
+/* ---------- Form ---------- */
+.wd-form {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+}
+
+.wd-section {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.wd-section-head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.wd-section-title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgb(15 23 42 / 70%);
+}
+
+.wd-section-hint {
+  margin: 0;
+  font-size: 13px;
+  color: rgb(15 23 42 / 50%);
+}
+
+/* ---------- Day pills ---------- */
+.wd-pills {
+  display: flex;
+  gap: 8px;
+}
+
+.wd-pill {
+  flex: 1 1 0;
+  position: relative;
+  border: 1px solid rgb(15 23 42 / 12%);
+  background: rgb(15 23 42 / 2.5%);
+  border-radius: 10px;
+  padding: 16px 6px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: rgb(15 23 42 / 65%);
+  transition:
+    border-color 0.12s ease,
+    color 0.12s ease,
+    background 0.12s ease,
+    transform 0.12s ease;
+}
+
+.wd-pill:hover {
+  border-color: rgb(16 116 185 / 50%);
+  background: rgb(16 116 185 / 5%);
+  color: rgb(15 23 42 / 92%);
+}
+
+.wd-pill:active {
+  transform: scale(0.97);
+}
+
+.wd-pill:focus-visible {
+  outline: none;
+  border-color: #1074b9;
+  box-shadow: 0 0 0 3px rgb(16 116 185 / 25%);
+}
+
+.wd-pill.is-active {
+  background: #1074b9;
+  border-color: #1074b9;
+  color: #fff;
+}
+
+.wd-pill.is-active:hover {
+  background: #0d6aaa;
+  border-color: #0d6aaa;
+}
+
+/* ---------- Fields ---------- */
+.wd-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.wd-field {
+  width: 100%;
+}
+
+.wd-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: rgb(15 23 42 / 80%);
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+/* ---------- Actions ---------- */
+.wd-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  border-top: 1px solid rgb(15 23 42 / 8%);
+  padding-top: 18px;
+}
+
+.wd-actions-hint {
+  font-size: 12px;
+  color: rgb(15 23 42 / 45%);
+  margin-right: auto;
+  font-style: italic;
+}
+
+/* ---------- Dark mode ---------- */
+:host-context(.dark-mode) .wd-page-title,
+:host-context([data-theme='dark']) .wd-page-title {
+  color: rgb(255 255 255 / 92%);
+}
+
+:host-context(.dark-mode) .wd-pill,
+:host-context([data-theme='dark']) .wd-pill {
+  border-color: rgb(255 255 255 / 14%);
+  background: rgb(255 255 255 / 3%);
+  color: rgb(255 255 255 / 65%);
+}
+
+:host-context(.dark-mode) .wd-pill:hover,
+:host-context([data-theme='dark']) .wd-pill:hover {
+  border-color: rgb(91 162 236 / 60%);
+  background: rgb(91 162 236 / 8%);
+  color: rgb(255 255 255 / 92%);
+}
+
+:host-context(.dark-mode) .wd-section-title,
+:host-context([data-theme='dark']) .wd-section-title {
+  color: rgb(255 255 255 / 72%);
+}
+
+:host-context(.dark-mode) .wd-page-head,
+:host-context([data-theme='dark']) .wd-page-head,
+:host-context(.dark-mode) .wd-actions,
+:host-context([data-theme='dark']) .wd-actions {
+  border-color: rgb(255 255 255 / 8%);
+}
+
+/* ---------- Responsive ---------- */
+@media (width <= 600px) {
+  .wd-page {
+    padding: 28px 16px 48px;
+  }
+
+  .wd-pill {
+    font-size: 13px;
+    padding: 14px 4px;
+  }
 }

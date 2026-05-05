@@ -540,7 +540,16 @@
       "Withdraw": "Withdraw",
       "View Active Charges": "View Active Charges",
       "View Inactive Charges": "View Inactive Charges",
-      "Yes": "Yes"
+      "Yes": "Yes",
+      "Auto-fill from Google": "Auto-fill from Google",
+      "Done": "Done",
+      "Import": "Import",
+      "Retry": "Retry",
+      "Today": "Today",
+      "Previous month": "Previous month",
+      "Next month": "Next month",
+      "Activate selected": "Activate selected",
+      "Clear": "Clear"
     },
     "catalogs": {
       "Interest payment waiver": "Interest Payment Waiver",
@@ -1198,7 +1207,12 @@
       "Not Yet Amortized Amount": "Not Yet Amortized Amount",
       "Adjusted Amount": "Adjusted Amount",
       "Charged Off Amount": "Charged Off Amount",
-      "Date": "Date"
+      "Date": "Date",
+      "Auto-fill Holidays": "Auto-fill Holidays",
+      "Total": "Total",
+      "Active": "Active",
+      "Upcoming": "Upcoming",
+      "Holidays": "Holidays"
     },
     "inputs": {
       "accounting": {
@@ -2546,7 +2560,13 @@
       "Income from Buy down fees": "Income from Buy down fees",
       "Buy down fee Expense": "Buy down fee Expense",
       "Skip Interest Refund Transaction Posting": "Skip Interest Refund Transaction Posting",
-      "Available Disbursement Amount (with Over Applied)": "Available Disbursement Amount (with Over Applied)"
+      "Available Disbursement Amount (with Over Applied)": "Available Disbursement Amount (with Over Applied)",
+      "Year": "Year",
+      "Apply to offices": "Apply to offices",
+      "Repayments Scheduling Type": "Repayments scheduling type",
+      "Month": "Month",
+      "List": "List",
+      "All offices": "All offices"
     },
     "links": {
       "Community": "Community",
@@ -2728,7 +2748,8 @@
       "Are you sure you want to": "Are you sure you want to ",
       "the productmix component with id": "the productmix component with id",
       "the Reschedule Loan": " the Reschedule Loan",
-      "the Transaction Type": "the Transaction Type"
+      "the Transaction Type": "the Transaction Type",
+      "Are you sure you want to delete": "Are you sure you want to delete"
     },
     "text": {
       "A": "A",
@@ -3467,7 +3488,24 @@
       "Buy Down Fees": "Buy Down Fees",
       "Undo Write-off Description": "This action will reverse the write-off transaction and restore the loan to its previous active status. Please provide a note explaining the reason for this action.",
       "UploadDocumentHint": "Upload a PDF or image to generate a preview.",
-      "Create Savings Product": "Create Savings Product"
+      "Egypt official holidays via Google Calendar": "Egypt official holidays via Google Calendar",
+      "Loading holidays": "Loading holidays…",
+      "holidays imported": "holidays imported",
+      "failed to import": "failed to import",
+      "selected": "selected",
+      "Select an office to view holidays": "Pick an office to see its holidays.",
+      "No holidays defined": "No holidays defined yet.",
+      "Imported from Google Calendar": "Imported from Google Calendar",
+      "Importing": "Importing",
+      "No holidays match your filter": "No holidays match this filter.",
+      "No holidays this month": "No holidays this month.",
+      "Configure how payments due on non-working days behave": "Configure how payments due on non-working days behave.",
+      "Tap a day to toggle": "Tap a day to toggle whether it counts as a working day.",
+      "pending — select to activate": "pending — select to activate",
+      "Activating": "Activating",
+      "No changes to save": "No changes to save",
+      "Select to activate or delete": "Select to activate or delete",
+      "already-active rows will be skipped": "already-active rows will be skipped"
     },
     "auditTrail": {
       "actions": {

@@ -50,15 +50,15 @@ export class WorkingDaysComponent implements OnInit, AfterViewInit {
   workingDaysForm: UntypedFormGroup;
   /** Working days data. */
   workingDaysData: any;
-  /** Week days */
+  /** Week days. Ordered Saturday-first to match the locale convention. */
   weekDays = [
+    { name: 'Saturday', value: 'SA', checked: false },
+    { name: 'Sunday', value: 'SU', checked: false },
     { name: 'Monday', value: 'MO', checked: false },
     { name: 'Tuesday', value: 'TU', checked: false },
     { name: 'Wednesday', value: 'WE', checked: false },
     { name: 'Thursday', value: 'TH', checked: false },
-    { name: 'Friday', value: 'FR', checked: false },
-    { name: 'Saturday', value: 'SA', checked: false },
-    { name: 'Sunday', value: 'SU', checked: false }
+    { name: 'Friday', value: 'FR', checked: false }
   ];
   /**  Repayment schedule type data. */
   repaymentRescheduleTypeData: any;
@@ -110,6 +110,38 @@ export class WorkingDaysComponent implements OnInit, AfterViewInit {
    */
   get recurrence(): UntypedFormArray {
     return this.workingDaysForm.get('recurrence') as UntypedFormArray;
+  }
+
+  /** Number of currently selected working days. */
+  get activeDayCount(): number {
+    if (!this.workingDaysForm) {
+      return this.weekDays.filter((d) => d.checked).length;
+    }
+    return this.recurrence.controls.filter((c) => !!c.value).length;
+  }
+
+  /** Comma-separated short names of active days, e.g. "Mon, Tue, Wed". */
+  get activeDayList(): string {
+    if (!this.workingDaysForm) {
+      return this.weekDays
+        .filter((d) => d.checked)
+        .map((d) => d.name.slice(0, 3))
+        .join(', ');
+    }
+    return this.recurrence.controls
+      .map((c, i) => (c.value ? this.weekDays[i].name.slice(0, 3) : null))
+      .filter((n): n is string => !!n)
+      .join(', ');
+  }
+
+  /**
+   * Toggle a day pill. Marks the form dirty so the submit button enables.
+   */
+  toggleDay(index: number): void {
+    const ctrl = this.recurrence.at(index);
+    ctrl.setValue(!ctrl.value);
+    ctrl.markAsDirty();
+    this.workingDaysForm.markAsDirty();
   }
 
   /**
