@@ -235,15 +235,13 @@
 }
 
 /* ---------- Dark mode ---------- */
-:host-context(.dark-mode),
-:host-context([data-theme='dark']) {
+:host-context(.dark-theme) {
   --ai-border: rgb(255 255 255 / 8%);
   --ai-text: rgb(255 255 255 / 92%);
   --ai-text-mid: rgb(255 255 255 / 65%);
   --ai-text-dim: rgb(255 255 255 / 45%);
 }
 
-:host-context(.dark-mode) .ai-item:hover,
-:host-context([data-theme='dark']) .ai-item:hover {
+:host-context(.dark-theme) .ai-item:hover {
   background: rgb(91 162 236 / 8%);
 }

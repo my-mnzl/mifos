@@ -230,8 +230,7 @@
 }
 
 /* ---------- Dark mode ---------- */
-:host-context(.dark-mode),
-:host-context([data-theme='dark']) {
+:host-context(.dark-theme) {
   --cal-border: rgb(255 255 255 / 8%);
   --cal-border-strong: rgb(255 255 255 / 16%);
   --cal-text-dim: rgb(255 255 255 / 38%);
@@ -240,14 +239,12 @@
   --cal-bg-out: rgb(255 255 255 / 2%);
 }
 
-:host-context(.dark-mode) .cal-bar,
-:host-context([data-theme='dark']) .cal-bar {
+:host-context(.dark-theme) .cal-bar {
   background: oklch(28% 0.06 var(--hue, 220));
   color: oklch(82% 0.1 var(--hue, 220));
 }
 
-:host-context(.dark-mode) .cal-day:hover,
-:host-context([data-theme='dark']) .cal-day:hover {
+:host-context(.dark-theme) .cal-day:hover {
   background: rgb(91 162 236 / 8%);
 }
 
