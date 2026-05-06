@@ -109,6 +109,16 @@
   font-size: 13px !important;
   font-weight: 500 !important;
   letter-spacing: 0.01em;
+
+  /* Pin the button to the brand blue across themes — Material's dark palette
+     resolves `color="primary"` to a lighter washed-out shade that doesn't
+     match the brand. */
+  background-color: #1074b9 !important;
+  color: #fff !important;
+}
+
+.hl-create-btn:hover {
+  background-color: #0d6aaa !important;
 }
 
 /* ---------- Tabs ---------- */
@@ -414,15 +424,25 @@
 
 /* ---------- Dark mode ---------- */
 :host-context(.dark-theme) {
-  --hl-border: rgb(255 255 255 / 8%);
-  --hl-border-strong: rgb(255 255 255 / 16%);
-  --hl-text: rgb(255 255 255 / 92%);
-  --hl-text-mid: rgb(255 255 255 / 65%);
-  --hl-text-dim: rgb(255 255 255 / 45%);
+  --hl-border: rgb(255 255 255 / 16%);
+  --hl-border-strong: rgb(255 255 255 / 28%);
+  --hl-text: rgb(255 255 255 / 95%);
+  --hl-text-mid: rgb(255 255 255 / 75%);
+  --hl-text-dim: rgb(255 255 255 / 55%);
+  --hl-accent: #5ba2ec;
 }
 
 :host-context(.dark-theme) .hl-list-group-head {
   background: rgb(20 28 40 / 92%);
+}
+
+:host-context(.dark-theme) .hl-bulkbar {
+  background: rgb(255 255 255 / 4%);
+}
+
+:host-context(.dark-theme) .hl-bulkbar.is-active {
+  background: rgb(91 162 236 / 12%);
+  border-color: rgb(91 162 236 / 50%);
 }
 
 :host-context(.dark-theme) .hl-row:hover {

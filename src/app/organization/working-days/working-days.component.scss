@@ -180,28 +180,59 @@
 
 /* ---------- Dark mode ---------- */
 :host-context(.dark-theme) .wd-page-title {
-  color: rgb(255 255 255 / 92%);
+  color: rgb(255 255 255 / 95%);
 }
 
-:host-context(.dark-theme) .wd-pill {
-  border-color: rgb(255 255 255 / 14%);
-  background: rgb(255 255 255 / 3%);
+:host-context(.dark-theme) .wd-page-meta {
   color: rgb(255 255 255 / 65%);
 }
 
+:host-context(.dark-theme) .wd-page-meta > span:first-child {
+  color: #5ba2ec;
+}
+
+:host-context(.dark-theme) .wd-pill {
+  border-color: rgb(255 255 255 / 28%);
+  background: rgb(255 255 255 / 6%);
+  color: rgb(255 255 255 / 88%);
+}
+
 :host-context(.dark-theme) .wd-pill:hover {
-  border-color: rgb(91 162 236 / 60%);
-  background: rgb(91 162 236 / 8%);
-  color: rgb(255 255 255 / 92%);
+  border-color: #5ba2ec;
+  background: rgb(91 162 236 / 14%);
+  color: rgb(255 255 255 / 100%);
+}
+
+:host-context(.dark-theme) .wd-pill.is-active {
+  background: #1074b9;
+  border-color: #5ba2ec;
+  color: #fff;
+}
+
+:host-context(.dark-theme) .wd-pill.is-active:hover {
+  background: #1383d0;
+  border-color: #7ab4ef;
 }
 
 :host-context(.dark-theme) .wd-section-title {
-  color: rgb(255 255 255 / 72%);
+  color: rgb(255 255 255 / 85%);
+}
+
+:host-context(.dark-theme) .wd-section-hint {
+  color: rgb(255 255 255 / 60%);
+}
+
+:host-context(.dark-theme) .wd-toggle {
+  color: rgb(255 255 255 / 88%);
+}
+
+:host-context(.dark-theme) .wd-actions-hint {
+  color: rgb(255 255 255 / 55%);
 }
 
 :host-context(.dark-theme) .wd-page-head,
 :host-context(.dark-theme) .wd-actions {
-  border-color: rgb(255 255 255 / 8%);
+  border-color: rgb(255 255 255 / 14%);
 }
 
 /* ---------- Responsive ---------- */
