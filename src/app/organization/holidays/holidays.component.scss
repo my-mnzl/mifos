@@ -413,8 +413,7 @@
 }
 
 /* ---------- Dark mode ---------- */
-:host-context(.dark-mode),
-:host-context([data-theme='dark']) {
+:host-context(.dark-theme) {
   --hl-border: rgb(255 255 255 / 8%);
   --hl-border-strong: rgb(255 255 255 / 16%);
   --hl-text: rgb(255 255 255 / 92%);
@@ -422,13 +421,11 @@
   --hl-text-dim: rgb(255 255 255 / 45%);
 }
 
-:host-context(.dark-mode) .hl-list-group-head,
-:host-context([data-theme='dark']) .hl-list-group-head {
+:host-context(.dark-theme) .hl-list-group-head {
   background: rgb(20 28 40 / 92%);
 }
 
-:host-context(.dark-mode) .hl-row:hover,
-:host-context([data-theme='dark']) .hl-row:hover {
+:host-context(.dark-theme) .hl-row:hover {
   background: rgb(91 162 236 / 8%);
 }
 

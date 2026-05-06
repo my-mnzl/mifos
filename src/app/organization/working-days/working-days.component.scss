@@ -179,34 +179,28 @@
 }
 
 /* ---------- Dark mode ---------- */
-:host-context(.dark-mode) .wd-page-title,
-:host-context([data-theme='dark']) .wd-page-title {
+:host-context(.dark-theme) .wd-page-title {
   color: rgb(255 255 255 / 92%);
 }
 
-:host-context(.dark-mode) .wd-pill,
-:host-context([data-theme='dark']) .wd-pill {
+:host-context(.dark-theme) .wd-pill {
   border-color: rgb(255 255 255 / 14%);
   background: rgb(255 255 255 / 3%);
   color: rgb(255 255 255 / 65%);
 }
 
-:host-context(.dark-mode) .wd-pill:hover,
-:host-context([data-theme='dark']) .wd-pill:hover {
+:host-context(.dark-theme) .wd-pill:hover {
   border-color: rgb(91 162 236 / 60%);
   background: rgb(91 162 236 / 8%);
   color: rgb(255 255 255 / 92%);
 }
 
-:host-context(.dark-mode) .wd-section-title,
-:host-context([data-theme='dark']) .wd-section-title {
+:host-context(.dark-theme) .wd-section-title {
   color: rgb(255 255 255 / 72%);
 }
 
-:host-context(.dark-mode) .wd-page-head,
-:host-context([data-theme='dark']) .wd-page-head,
-:host-context(.dark-mode) .wd-actions,
-:host-context([data-theme='dark']) .wd-actions {
+:host-context(.dark-theme) .wd-page-head,
+:host-context(.dark-theme) .wd-actions {
   border-color: rgb(255 255 255 / 8%);
 }
 

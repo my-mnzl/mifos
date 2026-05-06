@@ -86,7 +86,12 @@ export function HttpLoaderFactory(http: HttpClient) {
         provide: TranslateLoader,
         useFactory: (httpBackend: HttpBackend, locationStrategy: LocationStrategy) => {
           const http = new HttpClient(httpBackend);
-          return new TranslateHttpLoader(http, `/assets/translations/`, '.json');
+          // Append the build version as a cache-buster so a new bundle picks up
+          // the matching translations file instead of a stale browser-cached copy.
+          // The build runs with --output-hashing=none so without this query param
+          // browsers serve the previous deploy's en-US.json on every reload.
+          const suffix = `.json?v=${environment.version}-${environment.hash}`;
+          return new TranslateHttpLoader(http, `/assets/translations/`, suffix);
         },
         deps: [
           HttpBackend,
