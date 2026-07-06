@@ -152,17 +152,7 @@
         </h4>
         <mat-form-field class="flex-fill flex-23">
           <mat-label>{{ 'labels.inputs.Minimum' | translate }}</mat-label>
-          <input
-            type="number"
-            matInput
-            formControlName="minInterestRatePerPeriod"
-            [min]="0"
-            [attr.disabled]="isZeroInterest()"
-          />
-          <mat-error>
-            {{ 'labels.commons.Minimum Value must be' | translate }}
-            <strong>{{ 'labels.commons.greater equal to than 0' | translate }}</strong>
-          </mat-error>
+          <input type="number" matInput formControlName="minInterestRatePerPeriod" [attr.disabled]="isZeroInterest()" />
         </mat-form-field>
         <mat-form-field class="flex-fill flex-23">
           <mat-label>{{ 'labels.inputs.Default' | translate }}</mat-label>
@@ -181,19 +171,7 @@
         </mat-form-field>
         <mat-form-field class="flex-fill flex-23">
           <mat-label>{{ 'labels.inputs.Maximum' | translate }}</mat-label>
-          <input
-            type="number"
-            matInput
-            formControlName="maxInterestRatePerPeriod"
-            [min]="0"
-            [attr.disabled]="isZeroInterest()"
-          />
-          <mat-error>
-            {{ 'labels.commons.Maximum Value must be' | translate }}
-            <strong>{{ 'labels.commons.greater equal to than 0' | translate }}</strong>
-            {{ 'labels.commons.and must be greater than' | translate }}
-            <strong>{{ 'labels.commons.Minimum Principal' | translate }}</strong>
-          </mat-error>
+          <input type="number" matInput formControlName="maxInterestRatePerPeriod" [attr.disabled]="isZeroInterest()" />
         </mat-form-field>
         <mat-form-field class="flex-fill flex-23">
           <mat-label>{{ 'labels.inputs.Frequency' | translate }}</mat-label>
@@ -250,7 +228,7 @@
         </mat-checkbox>
         <mat-form-field class="flex-31">
           <mat-label>{{ 'labels.inputs.Minimum' | translate }}</mat-label>
-          <input type="number" matInput formControlName="minDifferentialLendingRate" [min]="0" required />
+          <input type="number" matInput formControlName="minDifferentialLendingRate" required />
           <mat-error>
             {{ 'labels.inputs.Minimum interest rate' | translate }} {{ 'labels.commons.is' | translate }}
             <strong>{{ 'labels.commons.required' | translate }}</strong>

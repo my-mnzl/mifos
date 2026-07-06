@@ -114,13 +114,9 @@
           >{{
             loanProduct.interestRatePerPeriod +
               ' (Min: ' +
-              (loanProduct.minInterestRatePerPeriod
-                ? loanProduct.minInterestRatePerPeriod
-                : loanProduct.interestRatePerPeriod) +
+              (loanProduct.minInterestRatePerPeriod ?? loanProduct.interestRatePerPeriod) +
               ', Max: ' +
-              (loanProduct.maxInterestRatePerPeriod
-                ? loanProduct.maxInterestRatePerPeriod
-                : loanProduct.interestRatePerPeriod) +
+              (loanProduct.maxInterestRatePerPeriod ?? loanProduct.interestRatePerPeriod) +
               ')'
           }}
           {{ loanProduct.interestRateFrequencyType?.value | translateKey: 'catalogs' }}</span
@@ -146,13 +142,9 @@
           <span class="flex-60">{{
             loanProduct.defaultDifferentialLendingRate +
               ' (Min: ' +
-              (loanProduct.minDifferentialLendingRate
-                ? loanProduct.minDifferentialLendingRate
-                : loanProduct.defaultDifferentialLendingRate) +
+              (loanProduct.minDifferentialLendingRate ?? loanProduct.defaultDifferentialLendingRate) +
               ', Max: ' +
-              (loanProduct.maxDifferentialLendingRate
-                ? loanProduct.maxDifferentialLendingRate
-                : loanProduct.defaultDifferentialLendingRate) +
+              (loanProduct.maxDifferentialLendingRate ?? loanProduct.defaultDifferentialLendingRate) +
               ')'
           }}</span>
         </div>
