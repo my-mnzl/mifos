@@ -17,6 +17,11 @@
   @if (investment; as data) {
     <p>{{ 'investment.asOf' | translate }} {{ data.position.businessDate }} · {{ data.currency.code }}</p>
     <p>{{ 'investment.positionNote' | translate }}</p>
+    @if (data.position.riskAssessmentStatus === 'PENDING') {
+      <p role="status">
+        <strong>{{ 'investment.pendingAssessment' | translate }}</strong> {{ 'investment.pendingNote' | translate }}
+      </p>
+    }
     <dl class="position">
       <div>
         <dt>{{ 'investment.contractualFace' | translate }}</dt>
@@ -40,23 +45,11 @@
       </div>
       <div>
         <dt>{{ 'investment.allowance' | translate }}</dt>
-        <dd>
-          @if (data.position.riskAssessmentStatus === 'ASSESSED') {
-            {{ amount(data.position.lossAllowanceMinor) | number: digitsInfo }}
-          } @else {
-            {{ 'investment.pendingAssessment' | translate }}
-          }
-        </dd>
+        <dd>{{ amount(data.position.lossAllowanceMinor) | number: digitsInfo }}</dd>
       </div>
       <div>
         <dt>{{ 'investment.netCarrying' | translate }}</dt>
-        <dd>
-          @if (data.position.riskAssessmentStatus === 'ASSESSED') {
-            {{ amount(data.position.netCarryingMinor) | number: digitsInfo }}
-          } @else {
-            {{ 'investment.pendingAssessment' | translate }}
-          }
-        </dd>
+        <dd>{{ amount(data.position.netCarryingMinor) | number: digitsInfo }}</dd>
       </div>
       <div>
         <dt>{{ 'investment.grossYield' | translate }}</dt>

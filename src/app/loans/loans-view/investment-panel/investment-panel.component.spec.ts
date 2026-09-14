@@ -92,14 +92,17 @@ describe('InvestmentPanelComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('1,838,499.00');
   });
 
-  it('does not present an unassessed zero allowance as assessed zero', () => {
+  it('shows posted amounts while distinguishing pending risk from assessed zero', () => {
     fixture.componentInstance.open();
     respond();
     const amounts = fixture.nativeElement.querySelectorAll('dd');
-    expect(amounts[5].textContent).toContain('Risk assessment pending');
-    expect(amounts[6].textContent).toContain('Risk assessment pending');
+    expect(amounts[5].textContent).toContain('0.00');
+    expect(amounts[6].textContent).toContain('2,438,499.00');
+    expect(fixture.nativeElement.textContent).toContain('Risk assessment pending');
+    expect(fixture.nativeElement.textContent).toContain('Zero posted allowance does not mean zero assessed loss.');
     fixture.componentInstance.load();
     respond({ ...investment, position: { ...investment.position, riskAssessmentStatus: 'ASSESSED' } });
+    expect(fixture.nativeElement.textContent).not.toContain('Risk assessment pending');
     expect(amounts[5].textContent).toContain('0.00');
     expect(amounts[6].textContent).toContain('2,438,499.00');
   });
