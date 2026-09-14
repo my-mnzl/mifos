@@ -1,0 +1,104 @@
+<mat-expansion-panel (opened)="open()" (closed)="expanded = false">
+  <mat-expansion-panel-header>
+    <mat-panel-title>{{ 'investment.title' | translate }}</mat-panel-title>
+  </mat-expansion-panel-header>
+  @if (loading) {
+    <p role="status">{{ 'investment.loading' | translate }}</p>
+  }
+  @if (errorKey) {
+    <p role="alert">{{ errorKey | translate }}</p>
+    <button mat-stroked-button (click)="load(!!investment)" [disabled]="loading">
+      {{ 'investment.retry' | translate }}
+    </button>
+  }
+  @if (notApplicable) {
+    <p>{{ 'investment.notApplicable' | translate }}</p>
+  }
+  @if (investment; as data) {
+    <p>{{ 'investment.asOf' | translate }} {{ data.position.businessDate }} · {{ data.currency.code }}</p>
+    <p>{{ 'investment.positionNote' | translate }}</p>
+    @if (data.position.riskAssessmentStatus === 'PENDING') {
+      <p role="status">
+        <strong>{{ 'investment.pendingAssessment' | translate }}</strong> {{ 'investment.pendingNote' | translate }}
+      </p>
+    }
+    <dl class="position">
+      <div>
+        <dt>{{ 'investment.contractualFace' | translate }}</dt>
+        <dd>{{ amount(data.position.contractualOutstandingMinor) | number: digitsInfo }}</dd>
+      </div>
+      <div>
+        <dt>{{ 'investment.grossBasis' | translate }}</dt>
+        <dd>{{ amount(data.position.grossPurchaseBasisMinor) | number: digitsInfo }}</dd>
+      </div>
+      <div>
+        <dt>{{ 'investment.discount' | translate }}</dt>
+        <dd>{{ amount(data.position.deferredDiscountMinor) | number: digitsInfo }}</dd>
+      </div>
+      <div>
+        <dt>{{ 'investment.fees' | translate }}</dt>
+        <dd>{{ amount(data.position.deferredIntegralFeeMinor) | number: digitsInfo }}</dd>
+      </div>
+      <div>
+        <dt>{{ 'investment.amortizedCost' | translate }}</dt>
+        <dd>{{ amount(data.position.amortizedCostMinor) | number: digitsInfo }}</dd>
+      </div>
+      <div>
+        <dt>{{ 'investment.allowance' | translate }}</dt>
+        <dd>{{ amount(data.position.lossAllowanceMinor) | number: digitsInfo }}</dd>
+      </div>
+      <div>
+        <dt>{{ 'investment.netCarrying' | translate }}</dt>
+        <dd>{{ amount(data.position.netCarryingMinor) | number: digitsInfo }}</dd>
+      </div>
+      <div>
+        <dt>{{ 'investment.grossYield' | translate }}</dt>
+        <dd>{{ data.position.grossYield | percent: '1.4-4' }}</dd>
+      </div>
+      <div>
+        <dt>{{ 'investment.netEir' | translate }}</dt>
+        <dd>{{ data.position.netEir | percent: '1.4-4' }}</dd>
+      </div>
+    </dl>
+    <p>{{ 'investment.rateConvention' | translate }}</p>
+    @if (!data.projection) {
+      <button mat-stroked-button (click)="load(true)" [disabled]="loading">
+        {{ 'investment.viewSchedule' | translate }}
+      </button>
+    }
+    @if (data.projection; as projection) {
+      <h3>{{ 'investment.scheduleTitle' | translate }}</h3>
+      @if (projection.unavailableReason) {
+        <p>{{ 'investment.' + projection.unavailableReason | translate }}</p>
+      } @else {
+        <p>{{ 'investment.projectionNote' | translate }}</p>
+        <div class="schedule" tabindex="0" role="region" [attr.aria-label]="'investment.scheduleTitle' | translate">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">{{ 'investment.date' | translate }}</th>
+                <th scope="col">{{ 'investment.opening' | translate }}</th>
+                <th scope="col">{{ 'investment.receipt' | translate }}</th>
+                <th scope="col">{{ 'investment.recovery' | translate }}</th>
+                <th scope="col">{{ 'investment.income' | translate }}</th>
+                <th scope="col">{{ 'investment.closing' | translate }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of projection.rows; track row.date) {
+                <tr>
+                  <td>{{ row.date }}</td>
+                  <td>{{ amount(row.openingCarryingMinor) | number: digitsInfo }}</td>
+                  <td>{{ amount(row.cashReceiptMinor) | number: digitsInfo }}</td>
+                  <td>{{ amount(row.investmentRecoveryMinor) | number: digitsInfo }}</td>
+                  <td>{{ amount(row.eirIncomeMinor) | number: digitsInfo }}</td>
+                  <td>{{ amount(row.closingCarryingMinor) | number: digitsInfo }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    }
+  }
+</mat-expansion-panel>
