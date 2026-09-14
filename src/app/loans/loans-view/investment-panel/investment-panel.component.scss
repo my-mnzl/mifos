@@ -1,0 +1,45 @@
+:host {
+  display: block;
+  margin: 20px 0;
+}
+
+.position {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+
+  > div {
+    flex: 1 1 220px;
+  }
+
+  dt {
+    font-weight: 500;
+  }
+
+  dd {
+    margin: 4px 0 0;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.schedule {
+  overflow-x: auto;
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th,
+  td {
+    padding: 12px;
+    text-align: right;
+    border-bottom: 1px solid var(--mdc-outlined-card-outline-color, #ddd);
+    font-variant-numeric: tabular-nums;
+
+    &:first-child {
+      text-align: left;
+      white-space: nowrap;
+    }
+  }
+}

@@ -48,6 +48,7 @@ import {
 import { MatTooltip } from '@angular/material/tooltip';
 import { DateFormatPipe } from '../../../pipes/date-format.pipe';
 import { FormatNumberPipe } from '../../../pipes/format-number.pipe';
+import { InvestmentPanelComponent } from '../investment-panel/investment-panel.component';
 import { STANDALONE_SHARED_IMPORTS } from 'app/standalone-shared.module';
 
 @Component({
@@ -56,6 +57,7 @@ import { STANDALONE_SHARED_IMPORTS } from 'app/standalone-shared.module';
   styleUrls: ['./repayment-schedule-tab.component.scss'],
   imports: [
     ...STANDALONE_SHARED_IMPORTS,
+    InvestmentPanelComponent,
     FaIconComponent,
     MatTable,
     MatColumnDef,
@@ -84,6 +86,8 @@ export class RepaymentScheduleTabComponent implements OnInit, OnChanges {
   private settingsService = inject(SettingsService);
   private dateUtils = inject(Dates);
   private dialog = inject(MatDialog);
+
+  loanId: number;
 
   /** Currency Code */
   @Input() currencyCode: string;
@@ -151,7 +155,10 @@ export class RepaymentScheduleTabComponent implements OnInit, OnChanges {
   ngOnInit() {
     if (this.route.parent) {
       this.route.parent.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-        next: (data: { loanDetailsData: { repaymentSchedule?: RepaymentSchedule; currency?: { code: string } } }) => {
+        next: (data: {
+          loanDetailsData: { id?: number; repaymentSchedule?: RepaymentSchedule; currency?: { code: string } };
+        }) => {
+          this.loanId = data.loanDetailsData?.id;
           this.loanDetailsDataRepaymentSchedule =
             data.loanDetailsData?.repaymentSchedule ?? this.getDefaultRepaymentSchedule();
           if (data.loanDetailsData?.currency?.code) {

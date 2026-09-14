@@ -1,4 +1,7 @@
 <div class="container">
+  @if (!forEditing && loanId) {
+    <mifosx-investment-panel [loanId]="loanId"></mifosx-investment-panel>
+  }
   @if (!forEditing) {
     <div class="layout-row m-t-20 align-end align-items-center">
       <button mat-raised-button color="primary" (click)="exportToPDF()">
